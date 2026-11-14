@@ -1,0 +1,17 @@
+/* Theme: brushed steel and signal orange. Machined grey panels, LCD read-outs and a petrol-blue second colour. */
+:root{
+  color-scheme:light;
+  --bg:#9aa3a9; --paper:#b0b8bd; --paper-2:#a7afb5; --paper-3:#9ea7ad; --card:#bcc3c7; --card-rgb:188,195,199; --paper-rgb:176,184,189;
+  --line:#1d252b; --rule:#8d979e; --rule-2:#77828a;
+  --ink:#12181d; --ink-2:#28323a; --muted:#46525b;
+  --acc:#c95816; --acc-2:#8f3a0b; --acc-3:#e2864a; --acc-pale:#d9bba5; --acc-line:#c4906c; --acc-rgb:201,88,22; --on-acc:#fbf1e8;
+  --sec:#2b5a70; --sec-2:#1c3e4f; --sec-pale:#a9bcc6; --sec-rgb:43,90,112;
+  --good:#2e6b45; --good-pale:#b3c9b9; --good-ink:#1b4429; --bad:#a3301c; --bad-pale:#d6b5ab; --bad-ink:#5f1a0d; --bad-line:#bf8a7d;
+  --warn:#86600c; --warn-pale:#d5c9a6; --warn-ink:#4b3605; --shadow-rgb:18,24,29;
+  --plot:#c9cfc6; --plot-grid:#a3ab9f;
+  --lcd:#a3b18c; --lcd-2:#93a27b; --lcd-ink:#1b2414; --lcd-dim:rgba(27,36,20,.18);
+  --f1:#c95816; --f2:#2b5a70; --f3:#6b3f86; --fr:#1e7a52;
+  --ray:#c95816; --bg-p-rgb:201,88,22; --bg-p2-rgb:30,48,60; --grid-ink:rgba(18,24,29,.045);
+  --top:60px; --frame:1.5px; --rad:14px;
+  --f-head:'Chakra Petch','FT Sym',system-ui,sans-serif; --f-body:'Red Hat Text','FT Sym',system-ui,sans-serif; --f-cap:'Chakra Petch','FT Sym',system-ui,sans-serif;
+}

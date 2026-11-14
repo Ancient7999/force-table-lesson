@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force table</title>
+<meta name="description" content="Interactive lesson: addition of vectors on a force table. Level the table, hang masses over three pulleys, find the equilibrant, and compare the resultant from the formula, the experiment and a scale drawing.">
+<link rel="preload" href="fonts/ChakraPetch-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/RedHatText-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/skin.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d252b'/%3E%3Cpath d='M16 16 L29 16 M16 16 L8 6 M16 16 L9 27' stroke='%23e2864a' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='none' stroke='%23dfe4e7' stroke-width='2'/%3E%3C/svg%3E">
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div id="cursor" class="hidden" aria-hidden="true"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="cu-ring" cx="18" cy="18" r="14"/><path class="cu-arr a1" d="M22 18h11M30 15.5l3 2.5-3 2.5"/><path class="cu-arr a2" d="M15.5 14.5 9 6M8.8 9.6 9 6l3.4.8"/><path class="cu-arr a3" d="M15.6 21.6 9.5 30M9.4 26.4l.1 3.6 3.4-1"/><circle class="cu-o" cx="18" cy="18" r="3.6"/><circle class="cu-dot" cx="18" cy="18" r="1.1"/></svg></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12 L22 12 M12 12 L6 4.5 M12 12 L6.5 20" stroke="#e2864a" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="2.8" fill="none" stroke="#dfe4e7" stroke-width="1.6"/></svg></span><div><div class="brand-t">Force table</div><div class="brand-s">Mechanics · Lab 12 · vectors</div></div></div>
+    <div class="top-crumb" id="top-crumb"></div>
+    <div class="top-r"><span>Addition of vectors</span><span class="chip">F<sub>R</sub></span></div>
+  </header>
+  <nav class="rail" id="rail-nav" aria-label="Sections"></nav>
+  <main class="stage">
+
+    <!-- ===================== PRACTICAL ===================== -->
+    <section class="view" id="view-ft-practical" data-title="Practical">
+      <div class="sheet wide">
+        <div class="folio"><span><b>Lab 12</b> · Practical</span><span>Force table</span></div>
+        <div class="prac-intro">
+          <h1 class="page-h">Force <em>table</em></h1>
+          <p class="lede">Three strings pull on one small ring. Two of them carry known weights at chosen angles; the third is adjusted until the ring sits centred and the thread above it hangs straight. That third force, the equilibrant, is equal and opposite to the resultant of the other two, which is then found again from the formula and from a scale drawing.</p>
+          <button type="button" class="btn-tut" id="ft-tut"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 1.5v11l9-5.5z" fill="currentColor"/></svg>Start tutorial</button>
+        </div>
+
+        <h2 class="step-h"><span class="no">01</span>Level, load and balance <em>· the force table</em></h2>
+        <div class="rig-frame rig tlock" id="ft-frame"><svg id="ft-rig" role="img" aria-label="Force table on a tripod with levelling screws, a degree scale, three pulleys clamped on the rim, strings to a central ring, hangers with slotted masses, and a thread from the ring to a hook above the centre"></svg></div>
+        <div class="rig-frame rig bench tlock" id="ft-bench-frame"><svg id="ft-bench" role="img" aria-label="Tray of slotted masses and the three hangers, F1, F2 and F3"></svg></div>
+        <p class="rig-msg" id="ft-msg" aria-live="polite"></p>
+        <div class="prac-mid ft-mid">
+          <div class="panel tlock" id="ft-loads">
+            <h2 class="panel-h">Pulleys and masses</h2>
+            <div class="load-rows" id="ft-rows"></div>
+            <p class="ctl-help small">Drag a pulley round the rim (or select it and use ← →, Shift for 10°). Drag slotted masses from the tray onto a hanger, or lift the top one off. Each hanger has a mass of 50 g of its own.</p>
+          </div>
+          <div class="panel tlock" id="ft-table-ctl">
+            <h2 class="panel-h">Table</h2>
+            <div class="ctl-row"><span class="lab">Turn the view</span><span class="nudge-btns"><button type="button" class="btn-quiet" id="ft-spinL" aria-label="Turn the table 15 degrees anticlockwise">⟲ 15°</button><button type="button" class="btn-quiet" id="ft-spinR" aria-label="Turn the table 15 degrees clockwise">15° ⟳</button></span><button type="button" class="btn-quiet sm" id="ft-front">Front</button></div>
+            <div class="ctl-row screws"><span class="lab">Levelling screws</span>
+              <span class="screw"><b>A</b><button type="button" class="btn-quiet sm" data-screw="0" data-d="-0.1" aria-label="Screw A down">▼</button><button type="button" class="btn-quiet sm" data-screw="0" data-d="0.1" aria-label="Screw A up">▲</button></span>
+              <span class="screw"><b>B</b><button type="button" class="btn-quiet sm" data-screw="1" data-d="-0.1" aria-label="Screw B down">▼</button><button type="button" class="btn-quiet sm" data-screw="1" data-d="0.1" aria-label="Screw B up">▲</button></span>
+              <span class="screw"><b>C</b><button type="button" class="btn-quiet sm" data-screw="2" data-d="-0.1" aria-label="Screw C down">▼</button><button type="button" class="btn-quiet sm" data-screw="2" data-d="0.1" aria-label="Screw C up">▲</button></span>
+            </div>
+            <p class="ctl-help small">The bubble drifts to the high side. Raise or lower the feet until it sits in the inner circle. Drag the table top to turn the whole table and read the scale from another side.</p>
+            <div class="lcd-strip" id="ft-status" aria-live="polite"><span class="lamp" id="ft-lamp"></span><span id="ft-status-t">Not balanced</span></div>
+            <div class="rec-row"><button type="button" class="btn-main" id="ft-record">Record the reading</button></div>
+            <p class="rec-msg" id="ft-recmsg" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <h2 class="step-h"><span class="no">02</span>Observation table</h2>
+        <div class="panel" id="ft-tpanel">
+          <div class="panel-head"><h2 class="panel-h">Observation</h2><span class="panel-tag"><i>F</i> = <i>mg</i> · <i>g</i> = 9.8 m/s²</span></div>
+          <div class="table-wrap"><table class="obs" id="ft-table"></table></div>
+          <div class="table-wrap" style="margin-top:14px"><table class="obs eq-t" id="ft-eqtable"></table></div>
+        </div>
+
+        <h2 class="step-h"><span class="no">03</span>Graphical method <em>· head to tail, to scale</em></h2>
+        <div class="board-wrap">
+          <div class="rig-frame board tlock" id="ft-board-frame"><svg id="ft-board" role="img" aria-label="Drawing board on graph paper: F1 along the baseline, F2 drawn from the tip of F1 at the angle theta, and the resultant closing the triangle, with a ruler and protractors"></svg></div>
+          <div class="panel tlock" id="ft-board-ctl">
+            <h2 class="panel-h">Drawing</h2>
+            <div class="g-read" id="ft-bread"></div>
+            <div class="board-btns">
+              <button type="button" class="btn-quiet sm" id="bd-f1">Draw F₁</button>
+              <button type="button" class="btn-quiet sm" id="bd-f2">Draw F₂ at θ</button>
+              <button type="button" class="btn-quiet sm" id="bd-r">Close the triangle</button>
+              <button type="button" class="btn-quiet sm" id="bd-ruler">Lay the ruler on F<sub>R</sub></button>
+              <button type="button" class="btn-quiet sm" id="bd-para" aria-pressed="false">Parallelogram view</button>
+              <button type="button" class="btn-quiet sm" id="bd-clear">Clear the board</button>
+            </div>
+            <p class="ctl-help small">Drag the round handle at the tip of F₁ along the baseline and the one at the tip of F₂ to its length and angle (0.1 cm and 1° steps). Drag the end of the ruler to turn it onto F<sub>R</sub>; the length is read where the tip of F<sub>R</sub> meets the scale.</p>
+          </div>
+        </div>
+
+        <h2 class="step-h"><span class="no">04</span>Calculation</h2>
+        <div class="panel" id="ft-calc">
+          <div class="panel-head"><h2 class="panel-h">Calculation</h2><span class="panel-tag"><span class="sym" tabindex="0" data-sym="gc"><i>g</i> = 9.8 m/s²</span></span></div>
+          <div class="calc-rows tlock">
+            <div class="calc-sec">The two forces</div>
+            <div class="cr" id="cr-F1"><label for="in-F1"><span class="k">1</span><span class="sym" tabindex="0" data-sym="F1"><i>F</i><sub>1</sub></span> = <span class="sym" tabindex="0" data-sym="m1"><i>m</i><sub>1</sub></span><span class="sym" tabindex="0" data-sym="g"><i>g</i></span> <span class="u">N</span></label><input id="in-F1" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-F1"></div></div>
+            <div class="cr" id="cr-F2"><label for="in-F2"><span class="k">2</span><span class="sym" tabindex="0" data-sym="F2"><i>F</i><sub>2</sub></span> = <span class="sym" tabindex="0" data-sym="m2"><i>m</i><sub>2</sub></span><span class="sym" tabindex="0" data-sym="g2"><i>g</i></span> <span class="u">N</span></label><input id="in-F2" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-F2"></div></div>
+            <div class="cr" id="cr-th"><label for="in-th"><span class="k">3</span>Angle between them <span class="sym" tabindex="0" data-sym="th"><i>θ</i></span> <span class="u">degree</span></label><input id="in-th" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-th"></div></div>
+            <div class="calc-sec">Resultant: theoretical, experimental, graphical</div>
+            <div class="cr" id="cr-FR"><label for="in-FR"><span class="k">4</span><span class="sym" tabindex="0" data-sym="FR"><i>F</i><sub>R</sub></span> = √(<span class="sym" tabindex="0" data-sym="F1p"><i>F</i><sub>1</sub></span>² + <span class="sym" tabindex="0" data-sym="F2p"><i>F</i><sub>2</sub></span>² + 2<i>F</i><sub>1</sub><i>F</i><sub>2</sub> cos <span class="sym" tabindex="0" data-sym="thp"><i>θ</i></span>) <span class="u">N</span></label><input id="in-FR" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-FR"></div></div>
+            <div class="cr" id="cr-FE"><label for="in-FE"><span class="k">5</span><span class="sym" tabindex="0" data-sym="FE"><i>F</i><sub>E</sub></span> = <span class="sym" tabindex="0" data-sym="m3"><i>m</i><sub>3</sub></span><i>g</i> <span class="u">N</span></label><input id="in-FE" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-FE"></div></div>
+            <div class="cr" id="cr-FG"><label for="in-FG"><span class="k">6</span><span class="sym" tabindex="0" data-sym="FG"><i>F</i><sub>G</sub></span> = <span class="sym" tabindex="0" data-sym="lr"><i>ℓ</i><sub>R</sub></span> × <span class="sym" tabindex="0" data-sym="s">scale</span> <span class="u">N</span></label><input id="in-FG" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-FG"></div></div>
+            <div class="calc-sec">Comparison with the theoretical value</div>
+            <div class="cr" id="cr-e1"><label for="in-e1"><span class="k">7</span>Experimental: <span class="sym" tabindex="0" data-sym="e1">% difference</span> = |<i>F</i><sub>E</sub> − <i>F</i><sub>R</sub>| ÷ <i>F</i><sub>R</sub> × 100 <span class="u">%</span></label><input id="in-e1" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-e1"></div></div>
+            <div class="cr" id="cr-e2"><label for="in-e2"><span class="k">8</span>Graphical: <span class="sym" tabindex="0" data-sym="e2">% difference</span> = |<i>F</i><sub>G</sub> − <i>F</i><sub>R</sub>| ÷ <i>F</i><sub>R</sub> × 100 <span class="u">%</span></label><input id="in-e2" type="text" inputmode="decimal" autocomplete="off"><div class="cr-work" id="w-e2"></div></div>
+            <div class="calc-actions tlock"><button type="button" class="btn-main" id="ft-check">Check</button></div>
+            <div class="check-msg" id="ft-chk" aria-live="polite"></div>
+            <div class="result-box" id="ft-result" hidden></div>
+          </div>
+        </div>
+        <div class="prac-foot tlock"><button type="button" class="btn-quiet" id="ft-reset">Start over</button></div>
+      </div>
+    </section>
+
+    <!-- ===================== AIM ===================== -->
+    <section class="view" id="view-ft-aim" data-title="Aim and outcomes">
+      <div class="sheet">
+        <p class="disclaimer">This site was prepared with the help of AI. Values, wording and figures may contain mistakes; the lab manual and the instructor take precedence.</p>
+        <div class="folio"><span><b>Lab 12</b> · Aim and outcomes</span><span>Mechanics</span></div>
+        <h1 class="page-h">Force <em>table</em></h1>
+        <figure class="aim-figure"><svg id="aim-fig" viewBox="0 0 900 330" role="img" aria-label="Two forces drawn head to tail with the resultant closing the triangle, and the equilibrant equal and opposite to the resultant"></svg></figure>
+        <div class="aim-block"><div class="aim-label">Aim</div><p class="aim-text">To understand the basis for addition of vectors using the force table.</p></div>
+        <h2 class="sub-h">Intended learning outcomes</h2>
+        <ul class="outcomes">
+          <li>Measure the resultant force.</li>
+          <li>Compare the experimental value with the theoretical value.</li>
+          <li>Compare the graphical value with the theoretical value.</li>
+        </ul>
+        <h2 class="sub-h">Medical perspectives</h2>
+        <div class="med-row">
+          <div class="med"><svg class="med-ic" viewBox="0 0 64 64" aria-hidden="true"><path d="M22 6 C18 18 20 26 26 32 C30 36 30 44 26 58" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><path d="M40 6 C44 18 42 26 36 32 C32 36 32 44 36 58" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><path d="M31 32 L31 14 M31 32 L17 44 M31 32 L46 44" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round"/><circle cx="31" cy="32" r="4" fill="var(--card)" stroke="var(--acc)" stroke-width="2"/></svg><h3>Force balance in joints and muscles</h3><p>A joint at rest is in equilibrium: the muscle pulls, the weight of the limb and the joint reaction add to zero as vectors, exactly like the three strings on the ring. Knowing two of them gives the third.</p></div>
+          <div class="med"><svg class="med-ic" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 50 H56" stroke="var(--ink)" stroke-width="2"/><path d="M20 50 V22 L36 14" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="44" cy="12" r="5" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><path d="M36 14 L48 30" stroke="var(--sec)" stroke-width="2" stroke-dasharray="3 3"/><rect x="44" y="30" width="8" height="10" fill="var(--acc)"/></svg><h3>Biomechanics and physiotherapy</h3><p>Traction set-ups use ropes, pulleys and weights to pull a limb in a chosen direction. The pull actually applied is the vector sum of the rope tensions, worked out just as on the force table.</p></div>
+          <div class="med"><svg class="med-ic" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="10" r="6" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><path d="M32 16 V40 M32 22 L20 32 M32 22 L44 32 M32 40 L24 58 M32 40 L40 58" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" fill="none"/><path d="M32 30 V60" stroke="var(--acc)" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M14 60 H50" stroke="var(--sec)" stroke-width="2"/></svg><h3>Posture and movement</h3><p>Standing still means the line of the total weight falls inside the base of support. Analysing posture and gait breaks body forces into components and adds them again, the same vector addition used here.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== THEORY ===================== -->
+    <section class="view" id="view-ft-theory" data-title="Theory">
+      <div class="sheet">
+        <div class="folio"><span><b>Lab 12</b> · Theory</span><span>Vectors</span></div>
+        <h1 class="page-h">Adding <em>forces</em></h1>
+        <h2 class="sub-h first">Scalars and vectors</h2>
+        <p class="prose">A mass of 0.20 kg is a scalar: a number with a unit. A force is a vector: it has a size and a direction, and two forces cannot be added by adding their sizes unless they point the same way. 2 N + 2 N can be anything from 0 N (opposite) to 4 N (together).</p>
+        <h2 class="sub-h">Head to tail: the triangle law</h2>
+        <div class="fig-grid"><div class="fig-box"><svg id="th-tri" viewBox="0 0 520 330" role="img" aria-label="F1 along the baseline, F2 from the tip of F1 at angle theta, the resultant from the tail of F1 to the tip of F2"></svg></div>
+        <div class="fig-text"><p>Draw <i>F</i><sub>1</sub> to scale. From its tip draw <i>F</i><sub>2</sub> to the same scale, in its own direction. The arrow from the tail of <i>F</i><sub>1</sub> to the tip of <i>F</i><sub>2</sub> is the resultant <i>F</i><sub>R</sub>: one force that does the same job as the two together.</p><p>The angle <i>θ</i> is the angle between the directions of <i>F</i><sub>1</sub> and <i>F</i><sub>2</sub>, measured from the line of <i>F</i><sub>1</sub> extended. The angle inside the triangle, between the two drawn sides, is 180° − <i>θ</i>.</p></div></div>
+        <h2 class="sub-h">The parallelogram law</h2>
+        <div class="fig-grid"><div class="fig-box"><svg id="th-para" viewBox="0 0 520 330" role="img" aria-label="F1 and F2 drawn from the same point, completed into a parallelogram whose diagonal is the resultant"></svg></div>
+        <div class="fig-text"><p>The same result, drawn differently: put both forces tail to tail, complete the parallelogram, and the diagonal from the common point is <i>F</i><sub>R</sub>. The upper half of the parallelogram is exactly the head-to-tail triangle.</p></div></div>
+        <h2 class="sub-h">The formula</h2>
+        <div class="eq-hero"><i>F</i><sub>R</sub> = √( <i>F</i><sub>1</sub>² + <i>F</i><sub>2</sub>² + 2 <i>F</i><sub>1</sub> <i>F</i><sub>2</sub> cos <i>θ</i> )</div>
+        <ol class="deriv">
+          <li>In the triangle, the sides are <i>F</i><sub>1</sub> and <i>F</i><sub>2</sub> and the angle between them is 180° − <i>θ</i>.<div class="eqn">law of cosines: <i>F</i><sub>R</sub>² = <i>F</i><sub>1</sub>² + <i>F</i><sub>2</sub>² − 2<i>F</i><sub>1</sub><i>F</i><sub>2</sub> cos(180° − <i>θ</i>)</div></li>
+          <li>cos(180° − <i>θ</i>) = − cos <i>θ</i>, so the minus sign turns into a plus.<div class="eqn"><i>F</i><sub>R</sub>² = <i>F</i><sub>1</sub>² + <i>F</i><sub>2</sub>² + 2<i>F</i><sub>1</sub><i>F</i><sub>2</sub> cos <i>θ</i></div></li>
+          <li>Direction of the resultant, measured from <i>F</i><sub>1</sub>:<div class="eqn">tan <i>α</i> = <i>F</i><sub>2</sub> sin <i>θ</i> ÷ (<i>F</i><sub>1</sub> + <i>F</i><sub>2</sub> cos <i>θ</i>)</div></li>
+        </ol>
+        <h2 class="sub-h">Explore</h2>
+        <div class="explorer">
+          <div class="ex-view"><svg id="th-ex" viewBox="0 0 560 360" role="img" aria-label="Interactive head-to-tail diagram of two forces and their resultant"></svg></div>
+          <div class="ex-side">
+            <div class="ctl"><label for="ex-f1"><span><i>F</i><sub>1</sub></span><span><b id="ex-f1v">2.0</b> N</span></label><input type="range" id="ex-f1" min="0.5" max="5" step="0.1" value="2"></div>
+            <div class="ctl"><label for="ex-f2"><span><i>F</i><sub>2</sub></span><span><b id="ex-f2v">2.5</b> N</span></label><input type="range" id="ex-f2" min="0.5" max="5" step="0.1" value="2.5"></div>
+            <div class="ctl"><label for="ex-th"><span><i>θ</i></span><span><b id="ex-thv">60</b>°</span></label><input type="range" id="ex-th" min="0" max="180" step="1" value="60"></div>
+            <div class="ex-out" id="ex-out"></div>
+            <p class="ex-note">At θ = 0 the forces simply add; at 180° they subtract; at 90° the formula becomes Pythagoras.</p>
+          </div>
+        </div>
+        <h2 class="sub-h">Equilibrium and the equilibrant</h2>
+        <div class="fig-grid"><div class="fig-box"><svg id="th-eq" viewBox="0 0 520 330" role="img" aria-label="Three forces on a ring, and the same three drawn head to tail closing into a triangle"></svg></div>
+        <div class="fig-text"><p>The ring is in equilibrium when the three string forces add to zero. Drawn head to tail they close into a triangle with no gap.</p><p>So the third force <i>F</i><sub>3</sub> has the same size as <i>F</i><sub>R</sub> and points the opposite way, 180° from it. It is called the <b>equilibrant</b>, and on the table its size is simply <i>m</i><sub>3</sub><i>g</i>.</p></div></div>
+        <h2 class="sub-h">Why each step matters</h2>
+        <div class="two-notes">
+          <div class="side-note"><div class="sn-k">Level table</div><p>On a tilted top the ring slides downhill on its own, adding a fake fourth force. The spirit level removes it.</p></div>
+          <div class="side-note sec"><div class="sn-k">Hanger mass</div><p>Each hanger has its own mass, 50 g here. The force is the whole hanging mass times <i>g</i>: hanger plus slotted masses.</p></div>
+          <div class="side-note"><div class="sn-k">Ring centred</div><p>The angles are read at the rim as if every string started at the centre. That is only true when the ring sits on the centre.</p></div>
+          <div class="side-note sec"><div class="sn-k">Friction</div><p>Pulley friction lets a small unbalanced force hide. Tapping the table gently before reading lets the ring settle where the forces really balance.</p></div>
+        </div>
+        <h2 class="sub-h">Sources of error</h2>
+        <ul class="prose-list">
+          <li>Friction in the pulleys, so a range of <i>m</i><sub>3</sub> appears to balance.</li>
+          <li>Reading the angles to the nearest degree; strings not exactly radial when the ring is off-centre.</li>
+          <li>Forgetting the mass of the hanger, or a mass label that is slightly off.</li>
+          <li>In the drawing: the chosen scale, pencil thickness, and reading the ruler and protractor.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== METHOD ===================== -->
+    <section class="view" id="view-ft-method" data-title="Method">
+      <div class="sheet">
+        <div class="folio"><span><b>Lab 12</b> · Method</span><span>Procedure</span></div>
+        <h1 class="page-h">Procedure <em>on the table</em></h1>
+        <h2 class="sub-h first">Apparatus</h2>
+        <div class="app-grid" id="app-grid"></div>
+        <h2 class="sub-h">Steps</h2>
+        <div class="method-wrap">
+          <ol class="steps" id="m-steps">
+            <li><button type="button" class="step"><span class="sn">1</span><span>Level the force table with the help of the spirit level.</span></button></li>
+            <li><button type="button" class="step"><span class="sn">2</span><span>Apply two forces on the force table by hanging masses over the pulleys, positioned at certain angles.</span></button></li>
+            <li><button type="button" class="step"><span class="sn">3</span><span>Note the weight and the angle of the string from which each weight hangs.</span></button></li>
+            <li><button type="button" class="step"><span class="sn">4</span><span>Adjust the third force hung over the third pulley, its mass and its angle, until it balances the other two: the ring sits centred.</span></button></li>
+            <li><button type="button" class="step"><span class="sn">5</span><span>The third force is called the equilibrant, since it is the force which establishes equilibrium.</span></button></li>
+            <li><button type="button" class="step"><span class="sn">6</span><span>Also find the resultant by the analytical (formula) and graphical (scale drawing) methods.</span></button></li>
+          </ol>
+          <div class="step-view"><div class="step-fig"><svg id="m-step-svg" viewBox="0 0 560 360" aria-hidden="true"></svg></div><p class="step-cap" id="m-step-cap" aria-live="polite"></p></div>
+        </div>
+        <div class="tips"><div class="tips-label">Good practice</div><ul>
+          <li>Include the mass of each hanger in <i>m</i>.</li>
+          <li>Keep the strings horizontal over the table and running over the middle of each pulley.</li>
+          <li>Tap the table lightly before deciding the ring is centred, so that pulley friction does not hide a small imbalance.</li>
+          <li>Read each angle at the string, with the eye directly above the scale.</li>
+          <li>For the drawing, choose a scale that makes the triangle as large as the paper allows.</li>
+        </ul></div>
+        <div class="tips safety"><div class="tips-label">Care</div><ul>
+          <li>Add masses gently; a sudden jerk can throw the ring off the pin or the string off a pulley.</li>
+          <li>Keep feet clear of the hangers.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ===================== OBSERVATION ===================== -->
+    <section class="view" id="view-ft-obs" data-title="Observation and calculation">
+      <div class="sheet">
+        <div class="folio"><span><b>Lab 12</b> · Observation and calculation</span><span>Worked example</span></div>
+        <h1 class="page-h">From readings <em>to F<sub>R</sub></em></h1>
+        <p class="ex-head"><span class="ex-badge">Example values</span></p>
+        <p class="note" style="margin-top:0;margin-bottom:22px">A worked example with two forces 60° apart. The values are chosen to be physically consistent; the equilibrant is the one that balances them on a table with a little pulley friction.</p>
+        <div class="formula-card"><div class="big-eq"><i>F</i><sub>R</sub> = √( <i>F</i><sub>1</sub>² + <i>F</i><sub>2</sub>² + 2<i>F</i><sub>1</sub><i>F</i><sub>2</sub> cos <i>θ</i> )</div><p><i>F</i> = <i>mg</i>, with <i>g</i> = 9.8 m/s² and <i>m</i> the whole hanging mass in kg.</p></div>
+        <h2 class="sub-h">Observation table</h2>
+        <div class="table-wrap"><table class="obs" id="ex-table"></table></div>
+        <div class="table-wrap" style="margin-top:14px"><table class="obs eq-t" id="ex-eqtable"></table></div>
+        <h2 class="sub-h">Scale drawing</h2>
+        <div class="graph-wrap"><svg id="ex-graph" viewBox="0 0 760 420" role="img" aria-label="Scale drawing of the example: F1 along the baseline, F2 at 60 degrees from its tip and the resultant measured with a ruler"></svg></div>
+        <h2 class="sub-h">Calculation</h2>
+        <div class="calc" id="ex-calc"></div>
+        <h2 class="sub-h">Result</h2>
+        <div class="table-wrap"><table class="res-t" id="ex-res"></table></div>
+        <h2 class="sub-h">Common slips</h2>
+        <div class="slips">
+          <div class="slip"><h3>Hanger left out</h3><p>0.15 kg of slotted masses on a 50 g hanger is m = 0.20 kg, not 0.15 kg.</p></div>
+          <div class="slip"><h3>Grams in F = mg</h3><p>200 × 9.8 = 1960 is not a force in newtons. Convert first: 0.200 kg × 9.8 = 1.96 N.</p></div>
+          <div class="slip"><h3>Wrong angle</h3><p>θ is the angle between F₁ and F₂ (60°), not the inside angle of the triangle (120°) and not the position of the third pulley.</p></div>
+          <div class="slip"><h3>Calculator in radians</h3><p>cos 60 in radians is −0.95. In degrees it is 0.5. Check the mode before the square root.</p></div>
+          <div class="slip"><h3>Square root forgotten</h3><p>14.65 is F<sub>R</sub>² in N². F<sub>R</sub> = √14.65 = 3.83 N.</p></div>
+          <div class="slip"><h3>Scale back-to-front</h3><p>At 1 cm = 0.5 N, a 7.6 cm line is 7.6 × 0.5 = 3.80 N, not 7.6 ÷ 0.5.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== MCQ ===================== -->
+    <section class="view" id="view-ft-mcq" data-title="MCQs">
+      <div class="sheet">
+        <div class="folio"><span><b>Lab 12</b> · MCQs</span><span>Check understanding</span></div>
+        <h1 class="page-h">Check <em>understanding</em></h1>
+        <div class="mcq-bar"><span class="mcq-score" id="mcq-score"></span><button type="button" class="btn-quiet sm" id="mcq-reset">Reset</button></div>
+        <ol class="mcq-list" id="mcq-list"></ol>
+        <div class="page-end with-extras">
+          <div class="extras"><button type="button" class="extras-toggle" aria-expanded="false" aria-haspopup="true">Optional extras ▴</button>
+            <div class="extras-panel" role="menu" id="extras-panel"><a role="menuitem" href="https://phet.colorado.edu/en/simulations/vector-addition" target="_blank" rel="noopener"><small>PhET · simulation</small>Vector addition</a><a role="menuitem" href="https://phet.colorado.edu/en/simulations/forces-and-motion-basics" target="_blank" rel="noopener"><small>PhET · simulation</small>Forces and motion: basics</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Resultant_force" target="_blank" rel="noopener"><small>Wikipedia</small>Resultant force</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Euclidean_vector" target="_blank" rel="noopener"><small>Wikipedia</small>Euclidean vector: addition and components</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Parallelogram_of_force" target="_blank" rel="noopener"><small>Wikipedia</small>Parallelogram of force</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Law_of_cosines" target="_blank" rel="noopener"><small>Wikipedia</small>Law of cosines</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Mechanical_equilibrium" target="_blank" rel="noopener"><small>Wikipedia</small>Mechanical equilibrium</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Biomechanics" target="_blank" rel="noopener"><small>Wikipedia</small>Biomechanics</a><a role="menuitem" href="https://en.wikipedia.org/wiki/Traction_(orthopedics)" target="_blank" rel="noopener"><small>Wikipedia</small>Traction in orthopaedics</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="tut-bar" id="tut-bar" hidden role="region" aria-label="Tutorial">
+  <div class="tut-main"><div class="tut-title" id="tut-title"></div><div class="tut-text" id="tut-text" aria-live="polite"></div><div class="tut-f" id="tut-f"></div></div>
+  <div class="tut-ctl">
+    <button type="button" class="tut-btn" id="tut-prev" title="Previous step (←)">‹ Previous step</button>
+    <button type="button" class="tut-btn" id="tut-next" title="Next step (→)">Next step ›</button>
+    <button type="button" class="tut-btn tut-pause" id="tut-pause" aria-pressed="false" title="Pause (Space)"><svg class="ti i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3.2" height="10"/><rect x="8.3" y="2" width="3.2" height="10"/></svg><svg class="ti i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 1.8v10.4l8.5-5.2z"/></svg><span class="tl">Pause</span></button>
+    <label class="tut-speed">Speed <select id="tut-speed" aria-label="Tutorial speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option></select></label>
+    <button type="button" class="tut-btn stop" id="tut-stop">■ Stop</button>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/tutor.js"></script>
+<script src="js/table.js"></script>
+<script src="js/board.js"></script>
+<script src="js/mcq.js"></script>
+<script src="js/content.js"></script>
+<script src="js/lab.js"></script>
+<script>SOL.boot();</script>
+</body>
+</html>
