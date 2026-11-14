@@ -2,11 +2,11 @@
 (function (L) {
   'use strict';
   const { $, el, txt, tsub, clamp, svgPoint, F_CAP, F_BODY } = L;
-  const svg = $('ft-board'), W = 900, H = 560, PX = 56; /* 56 px per cm */
-  const O = [64, 470];
+  const svg = $('ft-board'), W = 660, H = 480, PX = 56; /* 56 px per cm */
+  const O = [80, 412];
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
-  const DEF = () => ({ l1: 0, l2: 0, th: 0, R: false, ruler: null, para: false, src: null });
+  const DEF = () => ({ l1: 0, l2: 0, th: 0, R: false, ruler: null, para: false, prot: false, src: null });
   const bd = DEF();
   const defs = el('defs', null, svg);
   defs.innerHTML = `<pattern id="bp-mm" width="${PX / 10}" height="${PX / 10}" patternUnits="userSpaceOnUse"><path d="M${PX / 10} 0V${PX / 10}H0" fill="none" stroke="#9fb0a2" stroke-width=".35"/></pattern>
@@ -19,7 +19,7 @@
   const gScale = el('g', null, svg), gDraw = el('g', null, svg), gTools = el('g', null, svg), gLab = el('g', null, svg), gH = el('g', null, svg);
   const read = $('ft-bread');
 
-  const scale = () => { const s = bd.src; if (!s) return 0.5; return (s.F1 + s.F2) / 0.5 <= 13 ? 0.5 : (s.F1 + s.F2) <= 13 ? 1 : 2; };
+  const scale = () => { const s = bd.src; if (!s) return 0.5; return (s.F1 + s.F2) / 0.5 <= 11 ? 0.5 : (s.F1 + s.F2) <= 11 ? 1 : 2; };
   const r1 = v => Math.round(v * 10) / 10;
   const tip1 = () => [O[0] + bd.l1 * PX, O[1]];
   const tip2 = () => { const t = tip1(); return [t[0] + bd.l2 * PX * Math.cos(rad(bd.th)), t[1] - bd.l2 * PX * Math.sin(rad(bd.th))]; };
@@ -45,12 +45,13 @@
     }
     return pg;
   }
+  function thArc(c) { const r = 30, a1 = rad(bd.th); el('path', { d: `M${c[0] + 60} ${c[1]}H${c[0]}`, stroke: '#4b5a50', 'stroke-width': 1, 'stroke-dasharray': '3 4' }, gTools); el('path', { d: `M${c[0] + r} ${c[1]} A${r} ${r} 0 0 0 ${(c[0] + r * Math.cos(a1)).toFixed(1)} ${(c[1] - r * Math.sin(a1)).toFixed(1)}`, fill: 'none', stroke: '#8f3a0b', 'stroke-width': 1.6 }, gTools); const am = a1 / 2; txt(gTools, c[0] + (r + 14) * Math.cos(am), c[1] - (r + 14) * Math.sin(am) + 5, `θ = ${bd.th}°`, { 'font-size': 13, 'font-family': F_CAP, 'font-weight': 700, fill: '#8f3a0b' }); }
   const marks = {};
   function draw() {
     gScale.innerHTML = ''; gDraw.innerHTML = ''; gLab.innerHTML = ''; gTools.innerHTML = ''; gH.innerHTML = '';
     const s = scale();
     /* scale key */
-    const kx = W - 250, ky = 520;
+    const kx = W - 238, ky = 44;
     el('rect', { x: kx - 14, y: ky - 26, width: 248, height: 52, rx: 8, fill: 'rgba(29,37,43,.86)' }, gScale);
     el('path', { d: `M${kx} ${ky + 12}h${PX}M${kx} ${ky + 6}v12M${kx + PX} ${ky + 6}v12`, stroke: '#e2864a', 'stroke-width': 2 }, gScale);
     marks.scale = txt(gScale, kx + PX + 14, ky + 17, `Scale: 1 cm = ${s} N`, { 'font-size': 16, 'font-family': F_CAP, 'font-weight': 700, fill: '#f1e9df' });
@@ -58,7 +59,7 @@
     /* baseline and origin */
     el('path', { d: `M${O[0] - 30} ${O[1]}H${W - 24}`, stroke: '#4b5a50', 'stroke-width': 1, 'stroke-dasharray': '6 5' }, gScale);
     el('circle', { cx: O[0], cy: O[1], r: 3.5, fill: '#1d252b' }, gScale);
-    txt(gScale, O[0] - 14, O[1] + 22, 'O', { 'font-size': 15, 'font-family': F_CAP, 'font-weight': 700, fill: '#1d252b' });
+    txt(gScale, O[0] - 16, O[1] + 24, '0', { 'font-size': 15, 'font-family': F_CAP, 'font-weight': 700, fill: '#1d252b' });
     const t1 = tip1(), t2 = tip2();
     /* parallelogram view */
     if (bd.para && bd.l1 > 0 && bd.l2 > 0) {
@@ -68,8 +69,10 @@
       txt(gDraw, (O[0] + q[0]) / 2 - 18, (O[1] + q[1]) / 2, 'F₂', { 'font-size': 15, 'font-family': F_CAP, 'font-weight': 700, fill: 'var(--f2)', opacity: .7 });
     }
     marks.f1 = arrow(gDraw, O, t1, 'f1');
-    if (bd.l1 > 0) tsub(gLab, O[0] + (t1[0] - O[0]) * .62, O[1] - 12, [{ i: 'F' }, { sub: '1' }, ` = ${bd.l1.toFixed(1)} cm`], { 'text-anchor': 'middle', 'font-size': 16, 'font-family': F_BODY, 'font-weight': 600, fill: 'var(--f1)' });
+    if (bd.l1 > 0) { el('circle', { cx: t1[0], cy: t1[1], r: 3.5, fill: 'var(--f1)' }, gLab); tipLab(t1[0] + 6, t1[1] + 44, '1', 'var(--f1)', 'start'); }
+    if (bd.l1 > 0) tsub(gLab, O[0] + (t1[0] - O[0]) * .5, O[1] + 26, [{ i: 'F' }, { sub: '1' }, ` = ${bd.l1.toFixed(1)} cm`], { 'text-anchor': 'middle', 'font-size': 16, 'font-family': F_BODY, 'font-weight': 600, fill: 'var(--f1)' });
     marks.f2 = arrow(gDraw, t1, t2, 'f2');
+    if (bd.l2 > 0) { el('circle', { cx: t2[0], cy: t2[1], r: 3.5, fill: 'var(--f2)' }, gLab); tipLab(t2[0] - (bd.ruler != null ? 36 : 14), t2[1] - (bd.ruler != null ? 4 : 12), '2', 'var(--f2)', 'end'); }
     if (bd.l2 > 0) { const m = [(t1[0] + t2[0]) / 2, (t1[1] + t2[1]) / 2]; tsub(gLab, m[0] + 16, m[1] + 4, [{ i: 'F' }, { sub: '2' }, ` = ${bd.l2.toFixed(1)} cm`], { 'font-size': 16, 'font-family': F_BODY, 'font-weight': 600, fill: 'var(--f2)' }); }
     if (bd.R) {
       marks.fr = arrow(gDraw, O, t2, 'fr', 3.4);
@@ -78,15 +81,15 @@
       void g;
     } else marks.fr = null;
     /* protractor at the tip of F1 while F2 is drawn */
-    if (bd.l1 > 0 && bd.l2 > 0 && !bd.ruler) { el('path', { d: `M${t1[0]} ${t1[1]}h${110}`, stroke: '#4b5a50', 'stroke-width': 1, 'stroke-dasharray': '3 4' }, gTools); marks.thp = protractor(gTools, t1, 0, bd.th, bd.th + '°'); } else marks.thp = null;
+    if (bd.l1 > 0 && (bd.l2 > 0 || bd.prot) && bd.ruler == null) { el('path', { d: `M${t1[0]} ${t1[1]}h${110}`, stroke: '#4b5a50', 'stroke-width': 1, 'stroke-dasharray': '3 4' }, gTools); marks.thp = protractor(gTools, t1, 0, bd.th, bd.th + '°'); } else { marks.thp = null; if (bd.l2 > 0) thArc(t1); }
     /* ruler along the resultant, pivoting at O */
     marks.ruler = null; marks.alp = null;
     if (bd.ruler != null) {
-      const a = bd.ruler, len = 14 * PX, rg = el('g', { transform: `translate(${O[0]} ${O[1]}) rotate(${-a})` }, gTools);
+      const a = bd.ruler, len = 10 * PX, rg = el('g', { transform: `translate(${O[0]} ${O[1]}) rotate(${-a})` }, gTools);
       el('rect', { x: -8, y: 2, width: len + 16, height: 40, rx: 3, fill: 'url(#bp-ruler)', stroke: '#51624f', 'stroke-width': 1 }, rg);
-      let tk = ''; for (let k = 0; k <= 140; k++) { const L1 = k % 10 === 0 ? 14 : k % 5 === 0 ? 10 : 6; tk += `M${k * PX / 10} 2v${L1}`; }
+      let tk = ''; for (let k = 0; k <= 100; k++) { const L1 = k % 10 === 0 ? 14 : k % 5 === 0 ? 10 : 6; tk += `M${k * PX / 10} 2v${L1}`; }
       el('path', { d: tk, stroke: '#1d252b', 'stroke-width': .7 }, rg);
-      for (let c = 0; c <= 14; c++) txt(rg, c * PX, 30, String(c), { 'text-anchor': 'middle', 'font-size': 11, 'font-family': F_CAP, 'font-weight': 600, fill: '#1d252b' });
+      for (let c = 0; c <= 10; c++) txt(rg, c * PX, 30, String(c), { 'text-anchor': 'middle', 'font-size': 11, 'font-family': F_CAP, 'font-weight': 600, fill: '#1d252b' });
       txt(rg, len - 20, 38, 'cm', { 'font-size': 9.5, 'font-family': F_CAP, fill: '#1d252b' });
       const hd = el('g', { class: 'drag rh', transform: `translate(${len + 4} 22)` }, rg);
       el('circle', { r: 16, fill: 'rgba(201,88,22,.18)', stroke: 'var(--acc)', 'stroke-width': 1.6 }, hd);
@@ -105,14 +108,29 @@
     /* handles */
     marks.h1 = handle(t1, 'h1', 'var(--f1)', 'Tip of F1: drag along the baseline');
     if (bd.l1 > 0) marks.h2 = handle(bd.l2 > 0 ? t2 : [t1[0] + 30, t1[1] - 30], 'h2', 'var(--f2)', 'Tip of F2: drag to set its length and angle');
-    readouts();
+    readouts(); caption();
   }
+  function tipLab(x, y, n, c, anchor) { tsub(gLab, x, y, ['tip of ', { i: 'F' }, { sub: n }], { 'text-anchor': anchor, 'font-size': 14, 'font-family': F_BODY, 'font-weight': 600, fill: c, 'paint-order': 'stroke', stroke: '#c9d3c8', 'stroke-width': 4 }); }
   function handle(p, k, c, lab) {
     const g = el('g', { class: 'drag gh bh-' + k, 'data-k': k, transform: `translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})`, 'aria-label': lab }, gH);
     el('circle', { r: 22, fill: 'transparent' }, g);
     el('circle', { r: 9, fill: 'rgba(255,255,255,.55)', stroke: c, 'stroke-width': 2.4 }, g);
     el('circle', { r: 2.4, fill: c }, g);
     return g;
+  }
+  const capEl = $('bd-cap');
+  function caption() {
+    if (!capEl) return; const s = bd.src, sc = scale(), lr = lrRead();
+    const F = (n) => `<i>F</i><sub>${n}</sub>`;
+    let h;
+    if (lr != null) h = `<b>Step 4 · Measure.</b> The ruler, its 0 on the origin 0, lies along the line to the tip of ${F(2)}: <i>ℓ</i><sub>R</sub> = ${lr.toFixed(1)} cm, so ${F('G')} = ${lr.toFixed(1)} × ${sc} = ${(lr * sc).toFixed(2)} N. The protractor at 0 gives <i>α</i> = ${alRead()}° from the baseline.`;
+    else if (bd.ruler != null) h = `<b>Step 4 · Measure.</b> Turn the ruler about 0 until its edge lies along the line from 0 to the tip of ${F(2)}.`;
+    else if (bd.R) h = `<b>Step 3 · Resultant.</b> A straight line from 0 to the tip of ${F(2)}. This line is ${F('R')}.`;
+    else if (bd.l2 > 0) h = `<b>Step 2 · ${F(2)} from the tip of ${F(1)}.</b> ${bd.l2.toFixed(1)} cm at <i>θ</i> = ${bd.th}°, set with the protractor at the tip of ${F(1)}, its zero along the baseline direction.`;
+    else if (bd.l1 > 0 && bd.prot) h = `<b>Step 2 · ${F(2)} from the tip of ${F(1)}.</b> The protractor sits on the tip of ${F(1)}, its zero along the baseline direction; ${F(2)} will leave at <i>θ</i> = ${bd.th}°.`;
+    else if (bd.l1 > 0) h = `<b>Step 1 · ${F(1)} from 0.</b> ${bd.l1.toFixed(1)} cm along the baseline${s ? ` (${s.F1.toFixed(2)} ÷ ${sc} = ${(s.F1 / sc).toFixed(2)} cm)` : ''}.`;
+    else h = `<b>Start.</b> Origin 0 on the baseline; scale 1 cm = ${sc} N.`;
+    capEl.innerHTML = h;
   }
   const NUM = (id, v) => `<b id="${id}">${v}</b>`;
   function readouts() {
@@ -138,8 +156,8 @@
   });
   svg.addEventListener('pointermove', e => {
     if (!dr) return; const p = svgPoint(svg, e);
-    if (dr === 'h1') { bd.l1 = clamp(r1((p.x - O[0]) / PX), 0, 14.5); if (!bd.l1) { bd.l2 = 0; bd.R = false; } }
-    else if (dr === 'h2') { const t = tip1(), dx = (p.x - t[0]) / PX, dy = (t[1] - p.y) / PX; bd.l2 = clamp(r1(Math.hypot(dx, dy)), 0, 14.5); bd.th = clamp(Math.round(deg(Math.atan2(dy, dx))), 0, 180); }
+    if (dr === 'h1') { bd.l1 = clamp(r1((p.x - O[0]) / PX), 0, Math.floor((W - 30 - O[0]) / PX * 10) / 10); if (!bd.l1) { bd.l2 = 0; bd.R = false; } }
+    else if (dr === 'h2') { const t = tip1(), qx = clamp(p.x, 12, W - 12), qy = clamp(p.y, 12, O[1]), dx = (qx - t[0]) / PX, dy = (t[1] - qy) / PX; bd.l2 = clamp(r1(Math.hypot(dx, dy)), 0, 14.5); bd.th = clamp(Math.round(deg(Math.atan2(dy, dx))), 0, 180); }
     else if (dr === 'ruler') { let a = deg(Math.atan2(O[1] - p.y, p.x - O[0])); a = clamp(a, 0, 90); if (bd.R && Math.abs(a - rGeom().ang) < 0.8) a = rGeom().ang; bd.ruler = a; }
     draw();
   });
@@ -160,12 +178,12 @@
   $('bd-f1').addEventListener('click', guard(() => drawF1()));
   $('bd-f2').addEventListener('click', guard(() => drawF2()));
   $('bd-r').addEventListener('click', guard(() => { if (!closeR()) msg('Draw F₁ and F₂ first.'); }));
-  $('bd-ruler').addEventListener('click', guard(() => { if (!layRuler()) msg('Close the triangle with F_R first.'); }));
+  $('bd-ruler').addEventListener('click', guard(() => { if (!layRuler()) msg('Close the triangle with <i>F</i><sub>R</sub> first.'); }));
   $('bd-para').addEventListener('click', guard(() => setPara(!bd.para)));
   $('bd-clear').addEventListener('click', guard(clear));
   const box = {
     board: () => [0, 0, W, H],
-    scale: () => [W - 274, 484, 260, 66],
+    scale: () => [W - 262, 8, 256, 64],
     f1: () => { const t = tip1(); return [O[0] - 20, O[1] - 30, t[0] - O[0] + 50, 70]; },
     f2: () => { const a = tip1(), b = tip2(); const x0 = Math.min(a[0], b[0]) - 30, y0 = Math.min(a[1], b[1]) - 30; return [x0, y0, Math.abs(b[0] - a[0]) + 60, Math.abs(b[1] - a[1]) + 60]; },
     fr: () => { const b = tip2(); return [O[0] - 30, b[1] - 30, b[0] - O[0] + 60, O[1] - b[1] + 60]; },

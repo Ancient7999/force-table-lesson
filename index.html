@@ -70,19 +70,20 @@
 
         <h2 class="step-h"><span class="no">03</span>Graphical method <em>· head to tail, to scale</em></h2>
         <div class="board-wrap">
-          <div class="rig-frame board tlock" id="ft-board-frame"><svg id="ft-board" role="img" aria-label="Drawing board on graph paper: F1 along the baseline, F2 drawn from the tip of F1 at the angle theta, and the resultant closing the triangle, with a ruler and protractors"></svg></div>
+          <div class="bd-main"><div class="bd-cap" id="bd-cap"></div>
+          <div class="rig-frame board tlock" id="ft-board-frame"><svg id="ft-board" role="img" aria-label="Drawing board on graph paper: F1 from the origin 0 along the baseline, F2 from the tip of F1 at the angle theta, and the resultant from 0 to the tip of F2, with a ruler and protractors"></svg></div></div>
           <div class="panel tlock" id="ft-board-ctl">
             <h2 class="panel-h">Drawing</h2>
             <div class="g-read" id="ft-bread"></div>
             <div class="board-btns">
-              <button type="button" class="btn-quiet sm" id="bd-f1">Draw F₁</button>
-              <button type="button" class="btn-quiet sm" id="bd-f2">Draw F₂ at θ</button>
-              <button type="button" class="btn-quiet sm" id="bd-r">Close the triangle</button>
-              <button type="button" class="btn-quiet sm" id="bd-ruler">Lay the ruler on F<sub>R</sub></button>
-              <button type="button" class="btn-quiet sm" id="bd-para" aria-pressed="false">Parallelogram view</button>
+              <button type="button" class="btn-quiet sm" id="bd-f1">1 · F₁ from 0</button>
+              <button type="button" class="btn-quiet sm" id="bd-f2">2 · F₂ from the tip of F₁</button>
+              <button type="button" class="btn-quiet sm" id="bd-r">3 · Join 0 to the tip of F₂</button>
+              <button type="button" class="btn-quiet sm" id="bd-ruler">4 · Ruler and protractor at 0</button>
+              <button type="button" class="btn-quiet sm" id="bd-para" aria-pressed="false">Parallelogram (optional)</button>
               <button type="button" class="btn-quiet sm" id="bd-clear">Clear the board</button>
             </div>
-            <p class="ctl-help small">Drag the round handle at the tip of F₁ along the baseline and the one at the tip of F₂ to its length and angle (0.1 cm and 1° steps). Drag the end of the ruler to turn it onto F<sub>R</sub>; the length is read where the tip of F<sub>R</sub> meets the scale.</p>
+            <p class="ctl-help small">Drag the round handle at the tip of F₁ along the baseline, and the one at the tip of F₂ to its length and to the angle θ read on the protractor at the tip of F₁ (0.1 cm and 1° steps). The ruler turns about 0; drag its far end onto the line from 0 to the tip of F₂ and read the length where that tip meets the scale.</p>
           </div>
         </div>
 
@@ -237,7 +238,7 @@
         <h2 class="sub-h">Common slips</h2>
         <div class="slips">
           <div class="slip"><h3>Hanger left out</h3><p>0.15 kg of slotted masses on a 50 g hanger is m = 0.20 kg, not 0.15 kg.</p></div>
-          <div class="slip"><h3>Grams in F = mg</h3><p>200 × 9.8 = 1960 is not a force in newtons. Convert first: 0.200 kg × 9.8 = 1.96 N.</p></div>
+          <div class="slip"><h3>Grams in F = mg</h3><p>200 × 9.8 = 1960 is not a force in newtons. Convert first: 0.2 kg × 9.8 = 1.96 N.</p></div>
           <div class="slip"><h3>Wrong angle</h3><p>θ is the angle between F₁ and F₂ (60°), not the inside angle of the triangle (120°) and not the position of the third pulley.</p></div>
           <div class="slip"><h3>Calculator in radians</h3><p>cos 60 in radians is −0.95. In degrees it is 0.5. Check the mode before the square root.</p></div>
           <div class="slip"><h3>Square root forgotten</h3><p>14.65 is F<sub>R</sub>² in N². F<sub>R</sub> = √14.65 = 3.83 N.</p></div>

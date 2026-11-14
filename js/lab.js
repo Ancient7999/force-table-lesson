@@ -3,7 +3,7 @@
   'use strict';
   const { $, el, parseNum, NUM, setWork, tween, ease } = L;
   const FT = L.FT, BD = L.BD, G = FT.G;
-  const f2 = v => v.toFixed(2), f3 = v => v.toFixed(3), f1 = v => v.toFixed(1);
+  const f2 = v => v.toFixed(2), f3 = v => String(+v.toFixed(3)) /* masses in kg, no trailing zeros */, f1 = v => v.toFixed(1);
   const guard = f => (...a) => { if (!L.tut.on) f(...a); };
   const msgEl = $('ft-msg'), recMsg = $('ft-recmsg');
   const rsay = (t, c) => { recMsg.className = 'rec-msg' + (c ? ' ' + c : ''); recMsg.innerHTML = t || ''; };
@@ -17,7 +17,7 @@
       <span class="fchip f${i + 1}">${FT.NAME[i]}${i === 2 ? '<small>equilibrant</small>' : ''}</span>
       <div class="lr-grp"><span class="lr-k">Angle</span><span class="lcd" id="ft-a${i}">000°</span>
         <span class="nudge-btns"><button type="button" class="btn-quiet" data-ang="${i}" data-d="-10" aria-label="${FT.NAME[i]} pulley 10 degrees back">−10</button><button type="button" class="btn-quiet" data-ang="${i}" data-d="-1" aria-label="${FT.NAME[i]} pulley 1 degree back">−1</button><button type="button" class="btn-quiet" data-ang="${i}" data-d="1" aria-label="${FT.NAME[i]} pulley 1 degree on">+1</button><button type="button" class="btn-quiet" data-ang="${i}" data-d="10" aria-label="${FT.NAME[i]} pulley 10 degrees on">+10</button></span></div>
-      <div class="lr-grp"><span class="lr-k">Mass</span><span class="lcd" id="ft-m${i}">0.050 kg</span>
+      <div class="lr-grp"><span class="lr-k">Mass</span><span class="lcd" id="ft-m${i}">0.05 kg</span>
         <span class="add-btns">${FT.SLOTS.map(m => `<button type="button" class="btn-quiet sm" data-add="${i}" data-m="${m}" aria-label="Add ${m} g to ${FT.NAME[i]}">+${m}</button>`).join('')}<button type="button" class="btn-quiet sm" data-lift="${i}" aria-label="Lift the top mass off ${FT.NAME[i]}">Lift top</button></span></div>
     </div>`).join('');
   rows.addEventListener('click', guard(e => {
@@ -33,12 +33,12 @@
   const pad3 = a => String(a).padStart(3, '0');
   function status() {
     for (let i = 0; i < 3; i++) { $('ft-a' + i).textContent = pad3(FT.st.a[i]) + '°'; $('ft-m' + i).textContent = f3(FT.massKg(i)) + ' kg'; }
-    const lv = FT.level(), ok = FT.balanced(), n = FT.net(), tg = FT.target(), slant = Math.atan2(Math.hypot(tg.x, tg.y), 222) * 180 / Math.PI;
+    const lv = FT.level(), ok = FT.balanced(), n = FT.net(), ct = FT.contact(), dir = Math.round(n.dir);
     $('ft-lamp').className = 'lamp' + (ok && lv ? ' on' : '');
-    $('ft-status-t').textContent = ok && lv ? 'Balanced · thread straight' : ok ? 'Balanced, but the table is not level' : `Not balanced · thread slant ${f1(slant)}°`;
+    $('ft-status-t').textContent = ok && lv ? 'Balanced · ring clear of the pin' : ok ? 'Balanced, but the table is not level' : ct.touch ? `Not balanced · ring on the pin, pulled to ${dir}°` : 'Not balanced · ring moving';
     if (!lv) { msgEl.className = 'rig-msg warn'; msgEl.textContent = 'The table is not level: the bubble sits towards the high side, and the ring is pulled downhill by the slope as well as by the strings.'; }
-    else if (ok) { msgEl.className = 'rig-msg ok'; msgEl.textContent = 'Balanced: the ring sits centred on the pin and the thread above it hangs straight. The three forces add to zero.'; }
-    else { msgEl.className = 'rig-msg'; msgEl.textContent = `The ring is pulled off the centre and the thread slants by ${f1(slant)}°. The bigger the imbalance, the bigger the slant.`; }
+    else if (ok) { msgEl.className = 'rig-msg ok'; msgEl.textContent = 'Balanced: the ring sits centred round the pin without touching it, and the thread above it hangs straight. The three forces add to zero.'; }
+    else { msgEl.className = 'rig-msg'; msgEl.textContent = `The ring is pulled towards ${dir}° until its inner edge rests on the centre pin, which holds it. Net pull ${f2(n.m)} N; the red dot marks where the ring touches the pin.`; }
     void n;
   }
   FT.listeners.push(status);
@@ -64,7 +64,7 @@
   }
   function record() {
     if (!FT.level()) { rsay('Level the table first: on a tilted top the slope adds a fourth force.', 'warn'); return false; }
-    if (!FT.balanced()) { rsay('Not balanced yet: adjust the mass and the angle of F₃ until the thread hangs straight.', 'warn'); return false; }
+    if (!FT.balanced()) { rsay('Not balanced yet: adjust the mass and the angle of F₃ until the ring sits clear of the pin.', 'warn'); return false; }
     const s = FT.st, m = [0, 1, 2].map(FT.massKg), F = m.map(x => x * G);
     if (FT.st.stack[0].length + FT.st.stack[1].length === 0) { rsay('Hang some masses on F₁ and F₂ first: empty hangers make a dull reading.', 'warn'); return false; }
     const th = thOf(s.a[0], s.a[1]), FR = frCalc(F[0], F[1], th);
@@ -117,18 +117,18 @@
     if (near(val('th'), r.th, .5)) good('th'); else if (near(val('th'), 180 - r.th, .5)) flag('th', 'That is the inside angle of the triangle. θ is the angle between the two strings.'); else flag('th', 'θ is the angle between the strings of F₁ and F₂, from the pulley positions.');
     const a = val('F1'), b = val('F2'), t = val('th'), frT = (ok('F1') && ok('F2') && ok('th')) ? frCalc(a, b, t) : r.FR;
     if (near(val('FR'), frT, .015) || near(val('FR'), r.FR, .015)) good('FR');
-    else if (near(val('FR'), frT * frT, .05)) flag('FR', 'That is F_R²; take the square root.');
+    else if (near(val('FR'), frT * frT, .05)) flag('FR', 'That is <i>F</i><sub>R</sub>²; take the square root.');
     else if (near(val('FR'), Math.sqrt(Math.max(0, a * a + b * b + 2 * a * b * Math.cos(t))), .015)) flag('FR', 'The calculator was in radians: cos θ must be taken in degrees.');
     else flag('FR', 'Put F₁, F₂ and θ into √(F₁² + F₂² + 2F₁F₂ cos θ).');
-    if (near(val('FE'), r.FE, .011)) good('FE'); else flag('FE', `F_E is the weight of the whole third hanger: ${f3(r.m[2])} × 9.8.`);
+    if (near(val('FE'), r.FE, .011)) good('FE'); else flag('FE', `<i>F</i><sub>E</sub> is the weight of the whole third hanger: ${f3(r.m[2])} × 9.8.`);
     const fg = fgVal();
-    if (fg == null) flag('FG', 'Measure F_R on the drawing board first: ruler laid on F_R.');
+    if (fg == null) flag('FG', 'Measure on the drawing board first: steps 1 to 4, ruler from 0 along the line to the tip of F₂.');
     else if (near(val('FG'), fg, .011)) good('FG');
     else if (near(val('FG'), BD.lrRead() / BD.scale(), .02)) flag('FG', 'Multiply the length by the scale (N per cm), do not divide.');
-    else flag('FG', `F_G = length × scale = ${f1(BD.lrRead())} × ${BD.scale()}.`);
+    else flag('FG', `<i>F</i><sub>G</sub> = length × scale = ${f1(BD.lrRead())} × ${BD.scale()}.`);
     const pe = (x, y) => Math.abs(x - y) / y * 100;
-    if (ok('FE') && ok('FR') && near(val('e1'), pe(val('FE'), val('FR')), .03)) good('e1'); else flag('e1', '% difference = |F_E − F_R| ÷ F_R × 100.');
-    if (ok('FG') && ok('FR') && near(val('e2'), pe(val('FG'), val('FR')), .03)) good('e2'); else flag('e2', '% difference = |F_G − F_R| ÷ F_R × 100.');
+    if (ok('FE') && ok('FR') && near(val('e1'), pe(val('FE'), val('FR')), .03)) good('e1'); else flag('e1', '% difference = |<i>F</i><sub>E</sub> − <i>F</i><sub>R</sub>| ÷ <i>F</i><sub>R</sub> × 100.');
+    if (ok('FG') && ok('FR') && near(val('e2'), pe(val('FG'), val('FR')), .03)) good('e2'); else flag('e2', '% difference = |<i>F</i><sub>G</sub> − <i>F</i><sub>R</sub>| ÷ <i>F</i><sub>R</sub> × 100.');
     if (!notes.length) { chk.className = 'check-msg ok'; chk.innerHTML = 'All eight lines agree with the readings, the drawing and the formula.'; res.hidden = false; updResult(); return true; }
     chk.className = 'check-msg nudge'; chk.innerHTML = `<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`; res.hidden = true; return false;
   }
@@ -164,22 +164,22 @@
       case 'F1p': case 'f1q': case 'f1q2': return { title: '<i>F</i><sub>1</sub> from line 1', nm: 'F₁ in N', where: 'From the answer box of line 1.', src: () => IN.F1 };
       case 'F2p': case 'f2q': case 'f2q2': return { title: '<i>F</i><sub>2</sub> from line 2', nm: 'F₂ in N', where: 'From the answer box of line 2.', src: () => IN.F2 };
       case 'thp': case 'thq': return { title: '<i>θ</i> from line 3', nm: 'θ in degrees', where: 'From the answer box of line 3. The calculator must be in degree mode.', src: () => IN.th };
-      case 'FR': return { title: '<i>F</i><sub>R</sub>: theoretical resultant, in N', nm: 'F_R', where: 'By the formula, from F₁, F₂ and θ. Worked out below.', src: () => wNum('FR', 'r-FR') || IN.FR };
-      case 'r-FR': return { title: '', nm: 'F_R in N', where: 'The result of line 4. It is the reference value in lines 7 and 8, and matches the F_R column of the table.', src: () => cell('FR') };
-      case 'FE': return { title: '<i>F</i><sub>E</sub>: experimental resultant, in N', nm: 'F_E', where: 'The equilibrant balances F₁ and F₂, so its weight equals the resultant.', src: () => wNum('FE', 'r-FE') || IN.FE };
-      case 'r-FE': return { title: '', nm: 'F_E in N', where: 'The result of line 5. It goes into line 7.', src: () => wNum('e1', 'e1E') || IN.FE };
-      case 'FG': return { title: '<i>F</i><sub>G</sub>: graphical resultant, in N', nm: 'F_G', where: 'Length of F_R on the drawing, turned back into newtons with the scale.', src: () => wNum('FG', 'r-FG') || IN.FG };
-      case 'lr': case 'lrv': return { title: '<i>ℓ</i><sub>R</sub>: length of F<sub>R</sub> on the drawing, in cm', nm: 'ℓ_R in cm', where: 'Read on the ruler laid along F_R. Drawing board, ruler reading.', src: () => (BD.marks.lr && BD.marks.lr.isConnected ? BD.marks.lr : bdEl('bd-lr')) };
+      case 'FR': return { title: '<i>F</i><sub>R</sub>: theoretical resultant, in N', nm: '<i>F</i><sub>R</sub>', where: 'By the formula, from F₁, F₂ and θ. Worked out below.', src: () => wNum('FR', 'r-FR') || IN.FR };
+      case 'r-FR': return { title: '', nm: '<i>F</i><sub>R</sub> in N', where: 'The result of line 4. It is the reference value in lines 7 and 8, and matches the <i>F</i><sub>R</sub> column of the table.', src: () => cell('FR') };
+      case 'FE': return { title: '<i>F</i><sub>E</sub>: experimental resultant, in N', nm: '<i>F</i><sub>E</sub>', where: 'The equilibrant balances F₁ and F₂, so its weight equals the resultant.', src: () => wNum('FE', 'r-FE') || IN.FE };
+      case 'r-FE': return { title: '', nm: '<i>F</i><sub>E</sub> in N', where: 'The result of line 5. It goes into line 7.', src: () => wNum('e1', 'e1E') || IN.FE };
+      case 'FG': return { title: '<i>F</i><sub>G</sub>: graphical resultant, in N', nm: '<i>F</i><sub>G</sub>', where: 'Length of <i>F</i><sub>R</sub> on the drawing, turned back into newtons with the scale.', src: () => wNum('FG', 'r-FG') || IN.FG };
+      case 'lr': case 'lrv': return { title: '<i>ℓ</i><sub>R</sub>: length of F<sub>R</sub> on the drawing, in cm', nm: '<i>ℓ</i><sub>R</sub> in cm', where: 'Read on the ruler laid along <i>F</i><sub>R</sub>. Drawing board, ruler reading.', src: () => (BD.marks.lr && BD.marks.lr.isConnected ? BD.marks.lr : bdEl('bd-lr')) };
       case 's': case 'sv': return { title: 'Scale of the drawing', nm: 'scale in N per cm', where: 'Chosen before drawing: 1 cm of line stands for this many newtons. Drawing board, scale key.', src: () => BD.marks.scale };
-      case 'r-FG': return { title: '', nm: 'F_G in N', where: 'The result of line 6. It goes into line 8 and the F_G column of the table.', src: () => cell('FG') };
+      case 'r-FG': return { title: '', nm: '<i>F</i><sub>G</sub> in N', where: 'The result of line 6. It goes into line 8 and the <i>F</i><sub>G</sub> column of the table.', src: () => cell('FG') };
       case 'e1': return { title: 'Experimental % difference', nm: '% difference', where: 'How far the equilibrant is from the formula value, as a percentage of it.', src: () => wNum('e1', 'r-e1') || IN.e1 };
       case 'e2': return { title: 'Graphical % difference', nm: '% difference', where: 'How far the drawing is from the formula value, as a percentage of it.', src: () => wNum('e2', 'r-e2') || IN.e2 };
-      case 'e1E': case 'e2G': return { title: '', nm: k === 'e1E' ? 'F_E in N' : 'F_G in N', where: `From the answer box of line ${k === 'e1E' ? 5 : 6}.`, src: () => IN[k === 'e1E' ? 'FE' : 'FG'] };
-      case 'e1R': case 'e1R2': case 'e2R': case 'e2R2': return { title: '', nm: 'F_R in N', where: 'From the answer box of line 4.', src: () => IN.FR };
+      case 'e1E': case 'e2G': return { title: '', nm: k === 'e1E' ? '<i>F</i><sub>E</sub> in N' : '<i>F</i><sub>G</sub> in N', where: `From the answer box of line ${k === 'e1E' ? 5 : 6}.`, src: () => IN[k === 'e1E' ? 'FE' : 'FG'] };
+      case 'e1R': case 'e1R2': case 'e2R': case 'e2R2': return { title: '', nm: '<i>F</i><sub>R</sub> in N', where: 'From the answer box of line 4.', src: () => IN.FR };
       case 'r-e1': case 'r-e2': return { title: '', nm: '% difference', where: 'The result of this line. It goes into the answer box and the Result.', src: () => IN[k.slice(2)] };
-      case 'resR': return { title: '', nm: 'theoretical F_R in N', where: 'From line 4.', src: () => IN.FR };
-      case 'resE': return { title: '', nm: 'experimental F_E in N', where: 'From line 5.', src: () => IN.FE };
-      case 'resG': return { title: '', nm: 'graphical F_G in N', where: 'From line 6.', src: () => IN.FG };
+      case 'resR': return { title: '', nm: 'theoretical <i>F</i><sub>R</sub> in N', where: 'From line 4.', src: () => IN.FR };
+      case 'resE': return { title: '', nm: 'experimental <i>F</i><sub>E</sub> in N', where: 'From line 5.', src: () => IN.FE };
+      case 'resG': return { title: '', nm: 'graphical <i>F</i><sub>G</sub> in N', where: 'From line 6.', src: () => IN.FG };
       case 'resE1': return { title: '', nm: '% difference, experimental', where: 'From line 7.', src: () => IN.e1 };
       case 'resE2': return { title: '', nm: '% difference, graphical', where: 'From line 8.', src: () => IN.e2 };
     }
@@ -198,7 +198,7 @@
   L.onLeave['ft-practical'] = () => L.tutStop();
 
   /* ---------- tutorial ---------- */
-  const rig = $('ft-frame'), bench = $('ft-bench-frame'), board = $('ft-board-frame');
+  const rig = $('ft-frame'), bench = $('ft-bench-frame'), board = document.querySelector('.bd-main');
   const SR = b => ({ svg: FT.svg, box: b }), SB = b => ({ svg: FT.bsvg, box: b }), SD = b => ({ svg: BD.svg, box: b });
   /* a pointer hand that shows where each action happens */
   const hands = new Map();
@@ -229,9 +229,9 @@
     await T('Tripod and levelling screws', 'Three feet, each on a levelling screw, A, B and C. Turning a screw raises or lowers that side of the table.', { box: SR(FT.box.tripod), label: 'screws A, B, C', view: 'full' });
     await T('Pulley on a clamp', 'Each pulley is clamped to the rim and can be slid round it to any angle. A coloured index line on the scale shows where its string leaves the table.', { box: SR(FT.box.pulley(1)), label: 'pulley F₂' });
     await T('Strings and ring', 'Three strings are tied to a light ring. Each runs out to a pulley, over it, and down to a hanger.', { box: SR(FT.box.ring), label: 'ring' });
-    await T('Thread above the ring', 'A fine thread runs from the ring straight up to a hook on a stand arm, directly above the centre pin. When the forces balance, the ring sits on the centre and this thread hangs perfectly straight.', { box: SR(FT.box.thread), label: 'thread to the hook' });
+    await T('Thread above the ring', 'The centre pin passes through the ring and holds it, so the ring can only shift until its inner edge touches the pin. A fine thread from the ring to a hook above the centre hangs straight when the ring is centred.', { box: SR(FT.box.pin), label: 'pin through the ring' });
     await T('Hangers and slotted masses', 'Each hanger has a mass of 50 g of its own. Slotted masses of 200, 100, 50, 20 and 10 g slide onto it. The hanging mass m is hanger plus slots.', { el: bench, label: 'hangers' });
-    await T('Ring from above', 'This panel shows the ring as seen from above, enlarged, with the centre pin as a dot. The lamp lights when the ring is centred and the thread is straight.', { box: SR(FT.box.plan), label: 'plan view' });
+    await T('Ring from above', 'This panel shows the ring from above, enlarged, round the centre pin. A red dot marks where the ring touches the pin and the arrow shows which way it is pulled. The lamp lights when the ring is centred and clear of the pin.', { box: SR(FT.box.plan), label: 'plan view' });
     /* level */
     await T('Is the table level?', 'Three bare hangers at 0°, 120° and 240° pull equally, so they balance. Yet the ring has drifted: the table is tilted, and the slope pulls the ring downhill.', { box: SR(FT.box.ring), label: 'ring drifting' });
     await T('Spirit level', 'The bubble of the bull\'s-eye level floats to the high side. It sits well outside the inner circle, towards foot B.', { box: SR(FT.box.levelInset), label: 'bubble off-centre' });
@@ -247,10 +247,10 @@
     await T('First force: F₁ at 0°', 'The F₁ pulley stays at the 0° mark. Masses are now added to its hanger.', { box: SR(FT.box.pulley(0)), label: 'F₁ at 0°' });
     await T('Add 100 g to F₁', 'A 100 g slotted mass is lifted from the tray and slid onto the F₁ hanger.', { box: SB(FT.bbox.hanger(0)), focus: benchAndRing(), label: '+100 g', ms: 2600 });
     await addT(0, 100, Tt);
-    await T('The ring moves', 'F₁ now pulls harder than the others: the ring is drawn towards 0° and the thread above it slants.', { box: SR(FT.box.thread), label: 'thread slants' });
+    await T('The ring moves', 'F₁ now pulls harder than the others: the ring slides towards 0° until its inner edge rests on the pin. The pin holds it there.', { box: SR(FT.box.ring), label: 'ring on the pin' });
     await T('Add 50 g to F₁', 'A 50 g mass goes on as well.', { box: SB(FT.bbox.hanger(0)), focus: benchAndRing(), label: '+50 g', ms: 2200 });
     await addT(0, 50, Tt); hideHands();
-    await T('m₁ and F₁', 'm₁ = 0.050 + 0.100 + 0.050 = 0.200 kg, so F₁ = m₁g = 0.200 × 9.8 = 1.96 N.', { el: $('ft-m0'), label: 'm₁ = 0.200 kg', f: '<i>F</i><sub>1</sub> = 0.200 × 9.8 = 1.96 N' });
+    await T('m₁ and F₁', 'm₁ = 0.05 + 0.1 + 0.05 = 0.2 kg, so F₁ = m₁g = 0.2 × 9.8 = 1.96 N.', { el: $('ft-m0'), label: 'm₁ = 0.2 kg', f: '<i>F</i><sub>1</sub> = 0.2 × 9.8 = 1.96 N' });
     /* F2 */
     await T('Second force: move F₂ to 60°', 'The F₂ pulley is dragged round the rim from 120° towards 60°. Its readout follows in 1° steps.', { box: SR(FT.box.sector(55, 125)), label: 'drag F₂', ms: 3000 });
     await dragPulley(1, 62, 2400);
@@ -259,60 +259,58 @@
     await T('F₂ at 60°', 'F₂ sits at 60°, so the angle between F₁ and F₂ is θ = 60° − 0° = 60°.', { box: SR(FT.box.pulley(1)), label: 'θ = 60°' });
     await T('Add 200 g to F₂', 'A 200 g mass goes onto the F₂ hanger.', { box: SB(FT.bbox.hanger(1)), focus: benchAndRing(), label: '+200 g', ms: 2400 });
     await addT(1, 200, Tt); hideHands();
-    await T('m₂ and F₂', 'm₂ = 0.050 + 0.200 = 0.250 kg, so F₂ = 0.250 × 9.8 = 2.45 N.', { el: $('ft-m1'), label: 'm₂ = 0.250 kg', f: '<i>F</i><sub>2</sub> = 0.250 × 9.8 = 2.45 N' });
-    await T('Unbalanced', 'F₁ and F₂ together now far outweigh the bare F₃ hanger. The ring is pulled well off the centre, between 0° and 60°, and the thread slants steeply.', { box: SR(FT.box.thread), focus: [rig], label: 'large slant' });
+    await T('m₂ and F₂', 'm₂ = 0.05 + 0.2 = 0.25 kg, so F₂ = 0.25 × 9.8 = 2.45 N.', { el: $('ft-m1'), label: 'm₂ = 0.25 kg', f: '<i>F</i><sub>2</sub> = 0.25 × 9.8 = 2.45 N' });
+    await T('Unbalanced', 'F₁ and F₂ together now far outweigh the bare F₃ hanger. The ring is pressed against the pin, pulled to a direction between 0° and 60°.', { box: SR(FT.box.ring), focus: [rig], label: 'ring on the pin' });
     /* where the equilibrant goes */
-    await T('Where must F₃ go?', 'The resultant of F₁ and F₂ is F_R = √(1.96² + 2.45² + 2 × 1.96 × 2.45 × cos 60°) = 3.83 N, at α = 33.7° from F₁. The equilibrant must point the opposite way: 33.7° + 180° = 213.7°, so about 214°.', { box: SR(FT.box.plan), label: 'F₃ near 214°', f: 'tan α = 2.45 sin 60° ÷ (1.96 + 2.45 cos 60°) = 0.666 → α = 33.7°' });
+    await T('Where must F₃ go?', 'The resultant of F₁ and F₂ is <i>F</i><sub>R</sub> = √(1.96² + 2.45² + 2 × 1.96 × 2.45 × cos 60°) = 3.83 N, at α = 33.7° from F₁. The equilibrant must point the opposite way: 33.7° + 180° = 213.7°, so about 214°.', { box: SR(FT.box.plan), label: 'F₃ near 214°', f: 'tan α = 2.45 sin 60° ÷ (1.96 + 2.45 cos 60°) = 0.666 → α = 33.7°' });
     await T('Move F₃ to 214°', 'The F₃ pulley is dragged from 240° to 214°.', { box: SR(FT.box.sector(205, 245)), label: 'drag F₃', ms: 2400 });
     await dragPulley(2, 214, 2400); hideHands();
     await T('Load F₃', 'Now its mass is built up until the ring is centred. A 200 g mass first.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+200 g', ms: 2200 });
     await addT(2, 200, Tt);
-    await T('Still too light', 'm₃ = 0.250 kg is not enough: the thread still slants towards F₁ and F₂.', { box: SR(FT.box.thread), label: 'slant smaller' });
-    await T('Add 100 g', 'A 100 g mass: m₃ = 0.350 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+100 g', ms: 1800 });
+    await T('Still too light', 'm₃ = 0.25 kg is not enough: the ring still rests on the pin, pulled towards F₁ and F₂.', { box: SR(FT.box.ring), label: 'still on the pin' });
+    await T('Add 100 g', 'A 100 g mass: m₃ = 0.35 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+100 g', ms: 1800 });
     await addT(2, 100, Tt);
-    await T('Closer', 'The slant is much smaller now, but the ring is still a little off the centre.', { box: SR(FT.box.thread), label: 'nearly' });
-    await T('Add 50 g', 'Try another 50 g: m₃ = 0.400 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+50 g', ms: 1800 });
+    await T('Closer', 'The net pull is much smaller now, but it is still enough to hold the ring against the pin.', { box: SR(FT.box.ring), label: 'nearly' });
+    await T('Add 50 g', 'Try another 50 g: m₃ = 0.4 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+50 g', ms: 1800 });
     await addT(2, 50, Tt);
-    await T('Too much', 'Now F₃ wins: the ring is pulled slightly the other way, towards 214°. 0.400 kg overshoots.', { box: SR(FT.box.thread), label: 'overshoot' });
+    await T('Too much', 'Now F₃ wins: the ring is pulled the other way, towards 214°, and touches the pin on the opposite side. 0.4 kg overshoots.', { box: SR(FT.box.ring), label: 'overshoot' });
     await T('Lift it off', 'The 50 g mass is lifted off the top of the stack and returned to the tray.', { box: SB(FT.bbox.stackTop(2)), focus: benchAndRing(), label: 'lift off', ms: 2000 });
     await liftT(2, Tt);
-    await T('Add 20 g, twice', 'Two 20 g masses instead: 0.350 → 0.370 → 0.390 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+20 g', ms: 2000 });
+    await T('Add 20 g, twice', 'Two 20 g masses instead: 0.35 → 0.37 → 0.39 kg.', { box: SB(FT.bbox.hanger(2)), focus: benchAndRing(), label: '+20 g', ms: 2000 });
     await addT(2, 20, Tt); await Tt.wait(700); await addT(2, 20, Tt); hideHands();
-    await T('Balanced', 'm₃ = 0.390 kg at 214°: the ring sits centred on the pin and the thread hangs perfectly straight. The lamp is lit.', { box: SR(FT.box.thread), focus: [rig], label: 'straight' });
-    await T('How sensitive?', 'Moving F₃ just 1°, to 213°, is enough to pull the ring off again.', { box: SR(FT.box.pulley(2)), label: '213°', ms: 2400 });
+    await T('Balanced', 'm₃ = 0.39 kg at 214°: the ring sits centred round the pin, touching it nowhere, and the thread hangs straight. The lamp is lit.', { box: SR(FT.box.ring), focus: [rig], label: 'clear of the pin' });
+    await T('How sensitive?', 'Moving F₃ just 1°, to 213°, is enough to pull the ring back onto the pin.', { box: SR(FT.box.pulley(2)), label: '213°', ms: 2400 });
     hand(FT.svg, pulleyP(2)); FT.nudge(2, -1); await Tt.wait(2200);
-    await T('Back to 214°', 'Back to 214° and the thread is straight again.', { box: SR(FT.box.thread), label: '214°', ms: 2400 });
+    await T('Back to 214°', 'Back to 214° and the ring is centred again, clear of the pin.', { box: SR(FT.box.ring), label: '214°', ms: 2400 });
     FT.nudge(2, 1); hideHands(); await Tt.wait(1600);
-    await T('Equilibrant', 'F₃ = m₃g = 0.390 × 9.8 = 3.82 N. It is the equilibrant: equal and opposite to the resultant of F₁ and F₂, so the experimental resultant is F_E = 3.82 N.', { el: $('ft-m2'), label: 'm₃ = 0.390 kg', f: '<i>F</i><sub>E</sub> = 0.390 × 9.8 = 3.82 N' });
+    await T('Equilibrant', 'F₃ = m₃g = 0.39 × 9.8 = 3.82 N. It is the equilibrant: equal and opposite to the resultant of F₁ and F₂, so the experimental resultant is <i>F</i><sub>E</sub> = 3.82 N.', { el: $('ft-m2'), label: 'm₃ = 0.39 kg', f: '<i>F</i><sub>E</sub> = 0.39 × 9.8 = 3.82 N' });
     /* record */
     await T('Record the reading', 'With the table level and the ring balanced, the masses and angles go into the observation table.', { el: $('ft-record'), label: 'Record', ms: 2600 });
     record();
     const tp = $('ft-tpanel');
-    await T('Observation table', 'The columns of the manual: mass, force mg, the angle θ, and the three resultants. F_R is the formula value; F_G fills in after the drawing.', { el: tp });
-    await T('Masses and forces', 'm₁ = 0.200 kg → F₁ = 1.96 N; m₂ = 0.250 kg → F₂ = 2.45 N.', { el: cell('F1'), focus: [tp], label: 'F = mg' });
-    await T('Resultants', 'F_R = 3.83 N from the formula and F_E = 0.390 × 9.8 = 3.82 N from the equilibrant.', { el: cell('FE'), focus: [tp], label: 'F_R · F_E' });
+    await T('Observation table', 'The columns of the manual: mass, force mg, the angle θ, and the three resultants. <i>F</i><sub>R</sub> is the formula value; <i>F</i><sub>G</sub> fills in after the drawing.', { el: tp });
+    await T('Masses and forces', 'm₁ = 0.2 kg → F₁ = 1.96 N; m₂ = 0.25 kg → F₂ = 2.45 N.', { el: cell('F1'), focus: [tp], label: 'F = mg' });
+    await T('Resultants', '<i>F</i><sub>R</sub> = 3.83 N from the formula and <i>F</i><sub>E</sub> = 0.39 × 9.8 = 3.82 N from the equilibrant.', { el: cell('FE'), focus: [tp], label: '<i>F</i><sub>R</sub> · <i>F</i><sub>E</sub>' });
     await T('Pulley positions', 'The three positions, and the direction check: α = 33.7°, so F₃ was expected at 213.7°; it balanced at 214°.', { el: eqt, label: 'positions' });
     /* drawing board */
-    await T('Graphical method', 'Now the same addition by a scale drawing on graph paper, head to tail.', { el: board });
-    await T('Scale', 'A scale is chosen first so that the triangle is large: 1 cm of line stands for 0.5 N.', { box: SD(BD.box.scale()), label: '1 cm = 0.5 N' });
-    await T('Draw F₁', 'F₁ = 1.96 N becomes 1.96 ÷ 0.5 = 3.92 cm, drawn as 3.9 cm along the baseline from O.', { box: SD([BD.O[0] - 20, BD.O[1] - 40, 220, 80]), label: 'F₁ = 3.9 cm', ms: 3600, f: '1.96 ÷ 0.5 = 3.92 cm ≈ 3.9 cm' });
+    await T('Graphical method', 'The same addition by a scale drawing, in four steps: F₁ from 0, F₂ from the tip of F₁, a line from 0 to the tip of F₂, then measure that line. The caption above the board names each step.', { el: board });
+    await T('Scale', 'A scale is chosen first so that the triangle is large: 1 cm of line stands for 0.5 N.', { box: SD(BD.box.scale()), focus: [board], label: '1 cm = 0.5 N' });
+    await T('Step 1 · F₁ from 0', 'F₁ = 1.96 N becomes 1.96 ÷ 0.5 = 3.92 cm, drawn as 3.9 cm from the origin 0 along the baseline. Its tip is marked.', { box: SD([BD.O[0] - 20, BD.O[1] - 40, 260, 100]), focus: [board], label: 'F₁ = 3.9 cm', ms: 3600, f: '1.96 ÷ 0.5 = 3.92 cm ≈ 3.9 cm' });
     await tween(2200, k => { BD.set({ l1: BD.r1(3.9 * ease(k)) }); hand(BD.svg, BD.tip1()); });
-    await T('Draw F₂ at θ', 'From the tip of F₁, F₂ = 2.45 ÷ 0.5 = 4.9 cm is drawn at θ = 60° to the line of F₁, set with the protractor.', { box: SD(BD.box.prot1()), focus: [board], label: 'θ = 60°', ms: 3800, f: '2.45 ÷ 0.5 = 4.9 cm at 60°' });
-    await tween(2600, k => { const e = ease(k); BD.set({ l2: BD.r1(0.4 + 4.5 * e), th: Math.round(20 + 40 * e) }); hand(BD.svg, BD.tip2()); });
+    BD.set({ prot: true, th: 60 });
+    await T('Step 2 · F₂ from the tip of F₁', 'The protractor goes on the tip of F₁, its zero along the baseline direction. F₂ = 2.45 ÷ 0.5 = 4.9 cm is drawn from there at θ = 60°.', { box: SD(BD.box.prot1()), focus: [board], label: 'protractor at the tip of F₁', ms: 3800, f: '2.45 ÷ 0.5 = 4.9 cm at 60°' });
+    await tween(2600, k => { BD.set({ l2: Math.max(0.1, BD.r1(4.9 * ease(k))), th: 60 }); hand(BD.svg, BD.tip2()); });
     hideHands();
-    await T('F₂ drawn', 'F₂ runs 4.9 cm at 60°. Its tail sits on the tip of F₁: head to tail.', { box: SD(BD.box.f2()), focus: [board], label: 'head to tail' });
-    await T('Close the triangle', 'The resultant runs from the tail of F₁ (O) to the tip of F₂.', { box: SD(BD.box.fr()), focus: [board], label: 'F_R', ms: 2400 });
+    await T('F₂ drawn', 'F₂ runs 4.9 cm at 60° to the baseline direction. Its tail sits on the tip of F₁: head to tail. Its tip is marked.', { box: SD(BD.box.f2()), focus: [board], label: 'head to tail' });
+    await T('Step 3 · Resultant', 'A straight line from 0 to the tip of F₂. This line is the resultant <i>F</i><sub>R</sub>.', { box: SD(BD.box.fr()), focus: [board], label: '0 → tip of F₂', ms: 2400 });
     BD.closeR();
-    await T('Lay the ruler', 'The ruler is turned about O until its edge lies along F_R.', { box: SD(BD.box.fr()), focus: [board], label: 'ruler', ms: 2400 });
+    await T('Step 4 · Ruler from 0', 'The ruler is laid with its 0 on the origin 0 and turned until its edge lies along the line to the tip of F₂.', { box: SD(BD.box.fr()), focus: [board], label: 'ruler', ms: 2400 });
     const ang = BD.rGeom().ang;
     await tween(2400, k => { BD.set({ ruler: ang * ease(k) }); });
     BD.set({ ruler: ang });
-    await T('Read the length', `The tip of F_R reaches ${f1(BD.lrRead())} cm on the ruler, so F_G = ${f1(BD.lrRead())} × 0.5 = ${f2(fgVal())} N.`, { box: SD(BD.box.tip()), focus: [board], label: `ℓ_R = ${f1(BD.lrRead())} cm`, f: `<i>F</i><sub>G</sub> = ${f1(BD.lrRead())} × 0.5 = ${f2(fgVal())} N` });
-    await T('Its direction', `The protractor at O gives α = ${BD.alRead()}° from F₁, close to the 33.7° from the formula.`, { box: SD(BD.box.protO()), focus: [board], label: `α = ${BD.alRead()}°` });
-    await T('Parallelogram view', 'The same result as a parallelogram: F₂ drawn from O as well, the dashed sides completing it. F_R is the diagonal.', { el: $('bd-para'), focus: [board], alt: SD(BD.box.board()), label: 'parallelogram', ms: 2600 });
-    BD.setPara(true);
-    await T('Same triangle', 'The upper triangle of the parallelogram is the head-to-tail triangle.', { box: SD(BD.box.board()), ms: 3200 });
-    await T('Readouts', `Lengths, angles and F_G = ${f2(fgVal())} N, now also in the F_G column of the observation table.`, { el: $('ft-bread'), label: 'readouts' });
+    await T('Read the length', `The tip of F₂ meets the ruler at ${f1(BD.lrRead())} cm: <i>ℓ</i><sub>R</sub> = ${f1(BD.lrRead())} cm, so <i>F</i><sub>G</sub> = ${f1(BD.lrRead())} × 0.5 = ${f2(fgVal())} N.`, { box: SD(BD.box.tip()), focus: [board], label: `<i>ℓ</i><sub>R</sub> = ${f1(BD.lrRead())} cm`, f: `<i>F</i><sub>G</sub> = ${f1(BD.lrRead())} × 0.5 = ${f2(fgVal())} N` });
+    await T('Angle α at 0', `The protractor at 0, its zero along the baseline, gives α = ${BD.alRead()}° between F₁ and the resultant, close to the 33.7° from the formula.`, { box: SD(BD.box.protO()), focus: [board], label: `α = ${BD.alRead()}°` });
+    await T('Readouts', `Lengths, angles and <i>F</i><sub>G</sub> = ${f2(fgVal())} N, now also in the <i>F</i><sub>G</sub> column of the observation table.`, { el: $('ft-bread'), label: 'readouts' });
     /* calculation */
     const r = st.rec, F1s = f2(r.F[0]), F2s = f2(r.F[1]), ths = String(r.th), FRs = f2(frCalc(+F1s, +F2s, r.th)), FEs = f2(r.FE), FGs = f2(fgVal());
     const e1 = f2(Math.abs(+FEs - +FRs) / +FRs * 100), e2 = f2(Math.abs(+FGs - +FRs) / +FRs * 100);
@@ -329,12 +327,12 @@
     await T('', '', { trace: lSym('FR', 'FR') });
     await Tt.traceLine(wk('FR'));
     const A = (+F1s) ** 2, B = (+F2s) ** 2, Cc = 2 * +F1s * +F2s * Math.cos(r.th * Math.PI / 180);
-    await type('FR', FRs, 'F_R by formula', `Square each force, add twice their product times cos θ, then take the square root. cos 60° = 0.5 in degree mode.`, `√(${A.toFixed(4)} + ${B.toFixed(4)} + ${Cc.toFixed(4)}) = √${(A + B + Cc).toFixed(4)} = ${FRs} N`);
+    await type('FR', FRs, '<i>F</i><sub>R</sub> by formula', `Square each force, add twice their product times cos θ, then take the square root. cos 60° = 0.5 in degree mode.`, `√(${A.toFixed(4)} + ${B.toFixed(4)} + ${Cc.toFixed(4)}) = √${(A + B + Cc).toFixed(4)} = ${FRs} N`);
     await Tt.traceLine(wk('FE'));
-    await type('FE', FEs, 'F_E from the equilibrant', 'The whole third hanging mass times g.', `${f3(r.m[2])} × 9.8 = ${FEs} N`);
+    await type('FE', FEs, '<i>F</i><sub>E</sub> from the equilibrant', 'The whole third hanging mass times g.', `${f3(r.m[2])} × 9.8 = ${FEs} N`);
     await T('', '', { trace: lSym('FG', 'lr') });
     await Tt.traceLine(wk('FG'));
-    await type('FG', FGs, 'F_G from the drawing', 'Length times the scale.', `${f1(BD.lrRead())} × 0.5 = ${FGs} N`);
+    await type('FG', FGs, '<i>F</i><sub>G</sub> from the drawing', 'Length times the scale.', `${f1(BD.lrRead())} × 0.5 = ${FGs} N`);
     await Tt.traceLine(wk('e1'));
     await type('e1', e1, '% difference, experimental', 'The equilibrant against the formula.', `|${FEs} − ${FRs}| ÷ ${FRs} × 100 = ${e1} %`);
     await Tt.traceLine(wk('e2'));
@@ -343,7 +341,7 @@
     check();
     await T('Result', 'The three resultants side by side with their differences from the formula value.', { el: res, label: 'Result' });
     for (const k of ['resR', 'resE', 'resG']) { const n = rNum(k); if (n) await T('', '', { trace: n }); }
-    await T('Done', `F_R = ${FRs} N by formula, ${FEs} N from the equilibrant (${e1} %) and ${FGs} N from the drawing (${e2} %). Hovering or tapping any symbol or number in the Calculation shows its meaning and source. Start over to do it by hand.`, { el: chk });
+    await T('Done', `<i>F</i><sub>R</sub> = ${FRs} N by formula, ${FEs} N from the equilibrant (${e1} %) and ${FGs} N from the drawing (${e2} %). Hovering or tapping any symbol or number in the Calculation shows its meaning and source. Start over to do it by hand.`, { el: chk });
   }
   L.registerLab('ft', {
     btn: $('ft-tut'), scope: $('view-ft-practical'), reset,

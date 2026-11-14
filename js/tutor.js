@@ -25,7 +25,7 @@
     if (t.svg) { spotT = { box: t }; spotRing.classList.add('on'); }
     else if (t.namespaceURI === NS && t.tagName !== 'svg') { spotT = { ring: t }; spotRing.classList.add('on'); }
     else { hi(t); spotT = { el: t }; }
-    spotCap.textContent = label || ''; spotCap.classList.toggle('on', !!label);
+    spotCap.innerHTML = label || ''; spotCap.classList.toggle('on', !!label);
   }
   function spotRect() { if (!spotT) return null; if (spotT.box) return boxRect(spotT.box); const e = spotT.el || spotT.ring; return e.isConnected ? e.getBoundingClientRect() : null; }
   function rectOf(t) { if (!t) return null; if (t.svg) return boxRect(t); return t.getBoundingClientRect(); }
@@ -42,7 +42,7 @@
 
   /* ---------- traceable calculation ---------- */
   const SUBD = '₀₁₂₃₄₅₆₇₈₉';
-  const plain = h => String(h).replace(/<sub>(\d+)<\/sub>/g, (m, s) => s.replace(/\d/g, d => SUBD[+d])).replace(/<sub>([^<]*)<\/sub>/g, (m, s) => '_' + s).replace(/<sup>2<\/sup>/g, '²').replace(/<sup>3<\/sup>/g, '³').replace(/<sup>−1<\/sup>/g, '⁻¹').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&');
+  const plain = h => String(h).replace(/<sub>(\d+)<\/sub>/g, (m, s) => s.replace(/\d/g, d => SUBD[+d])).replace(/<sup>2<\/sup>/g, '²').replace(/<sup>3<\/sup>/g, '³').replace(/<sup>−1<\/sup>/g, '⁻¹').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&');
   L.plain = plain;
   const filled = e => !!e && (e.tagName === 'INPUT' ? e.value.trim() !== '' : !!e.textContent.trim() && e.textContent.trim() !== '—');
   L.filled = filled;
@@ -172,7 +172,7 @@
   }
   const ease = k => (k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
   function tScroll(y) { return tween(Math.min(900, 250 + Math.abs(y - window.scrollY) * .5), (() => { const y0 = window.scrollY; return k => window.scrollTo({ top: y0 + (y - y0) * ease(k), behavior: 'instant' }); })()); }
-  function step(title, text, f) { navStep(); tTitle.textContent = title; tText.textContent = text; tF.innerHTML = f || ''; }
+  function step(title, text, f) { navStep(); tTitle.innerHTML = title; tText.innerHTML = text; tF.innerHTML = f || ''; }
   const words = s => (String(s || '').replace(/<[^>]+>/g, ' ').match(/\S+/g) || []).length;
   const rt = (...s) => 2500 + 60 * s.reduce((a, x) => a + words(x), 0);
   /* the visible band between the sticky header (top bar, plus the section row on narrow screens) and the floating dock */

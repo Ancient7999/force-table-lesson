@@ -176,3 +176,6 @@ body.tut-on.tut-pair #ft-bench-frame{margin-top:8px}
 .eq-hero{font-size:32px}
 @media (max-width:600px){.eq-hero{font-size:21px}.big-eq{font-size:22px;white-space:normal}}
 @media (max-width:980px){ .ri-s{letter-spacing:.02em;font-size:9.5px;text-overflow:clip} }
+.bd-cap{background:#20282e;color:#e6ebee;border:1px solid #46525b;border-radius:10px 10px 0 0;padding:10px 14px;font:500 15px/1.5 var(--f-body);min-height:3.2em;margin-bottom:-2px}
+.bd-cap b{color:#f0a36f;font-weight:700}
+@media (max-width:600px){.bd-cap{font-size:13.5px;padding:8px 10px}}

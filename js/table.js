@@ -23,7 +23,8 @@
     return { x, y, m: Math.hypot(x, y), dir: ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360 };
   }
   const balanced = () => net().m <= FR;
-  const DMAX = 46, F0 = 0.55;
+  /* the centre pin passes through the ring: the ring can only shift until its inner edge rests on the pin */
+  const RING_R = 18, RING_W = 4.5, PIN_R = 4.5, DMAX = RING_R - RING_W / 2 - PIN_R, F0 = 0.005;
   function target() { const n = net(); if (n.m <= FR) return { x: 0, y: 0 }; const d = DMAX * Math.tanh((n.m - FR) / F0); return { x: d * n.x / n.m, y: d * n.y / n.m }; }
 
   /* ---------- geometry of the oblique view ---------- */
@@ -134,10 +135,9 @@
     LV.bubble = el('ellipse', { rx: 4.2, ry: 4.2 * K + 1, fill: 'url(#g-bubble)', stroke: '#6d7f45', 'stroke-width': .6 }, lg);
     LV.u = lu; LV.v = lv;
     /* centre pin */
-    const p0 = P(0, 0, 0), p1 = P(0, 0, 16);
-    el('ellipse', { cx: p0[0], cy: p0[1], rx: 4, ry: 2, fill: '#1b2125' }, gDisc);
-    el('rect', { x: p1[0] - 2, y: p1[1], width: 4, height: p0[1] - p1[1], fill: 'url(#g-rod)' }, gDisc);
-    el('ellipse', { cx: p1[0], cy: p1[1], rx: 2.4, ry: 1.2, fill: '#eef1f2' }, gDisc);
+    const p0 = P(0, 0, 0), p1 = P(0, 0, 4);
+    el('ellipse', { cx: p0[0], cy: p0[1], rx: 7, ry: 7 * K, fill: '#1b2125' }, gDisc);
+    el('rect', { x: p1[0] - 4.5, y: p1[1], width: 9, height: p0[1] - p1[1], fill: 'url(#g-rod)' }, gDisc);
   }
   const LV = { bubble: null, u: 0, v: 0 };
 
@@ -207,20 +207,25 @@
   const strs = [0, 1, 2].map(i => el('path', { stroke: '#f3eddc', 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round' }, gStr));
   const plumb = el('path', { stroke: '#e9eef0', 'stroke-width': 1, 'stroke-dasharray': '3 5', opacity: .35, fill: 'none' }, gStr);
   const thread = el('path', { stroke: '#fbf6e8', 'stroke-width': 1.5, fill: 'none' }, gStr);
-  const ringShadow = el('ellipse', { rx: 15, ry: 15 * K, fill: '#000', opacity: .25 }, gStr);
-  const ringO = el('ellipse', { rx: 15, ry: 15 * K, fill: 'none', stroke: 'url(#g-nickel)', 'stroke-width': 4.5 }, gStr);
-  const ringI = el('ellipse', { rx: 15, ry: 15 * K, fill: 'none', stroke: '#2b3237', 'stroke-width': .8 }, gStr);
+  const ringShadow = el('ellipse', { rx: RING_R, ry: RING_R * K, fill: '#000', opacity: .25 }, gStr);
+  const ringO = el('ellipse', { rx: RING_R, ry: RING_R * K, fill: 'none', stroke: 'url(#g-nickel)', 'stroke-width': RING_W }, gStr);
+  const ringI = el('ellipse', { rx: RING_R - RING_W / 2, ry: (RING_R - RING_W / 2) * K, fill: 'none', stroke: '#2b3237', 'stroke-width': .8 }, gStr);
+  /* upper part of the centre pin, drawn over the ring so the pin visibly passes through it */
+  const pinTop = el('g', null, gStr);
+  (function () { const a = P(0, 0, 4), b = P(0, 0, 24); el('rect', { x: b[0] - PIN_R, y: b[1], width: 2 * PIN_R, height: a[1] - b[1], fill: 'url(#g-rod)' }, pinTop); el('ellipse', { cx: b[0], cy: b[1], rx: PIN_R, ry: PIN_R * K, fill: '#eef1f2', stroke: '#8a959c', 'stroke-width': .6 }, pinTop); })();
+  const contactDot = el('circle', { r: 2.6, fill: '#ff6a3d', opacity: 0 }, gStr);
   const knots = [0, 1, 2].map(i => el('circle', { r: 2.6, fill: COL[i] }, gStr));
 
   /* HUD: plan view of the ring, spirit level close-up and the balance lamp */
   const plan = el('g', { transform: 'translate(880 120)' }, gHud);
   el('rect', { x: -96, y: -98, width: 192, height: 228, rx: 12, fill: '#20282e', stroke: '#566168', 'stroke-width': 1 }, plan);
   txt(plan, 0, -78, 'RING FROM ABOVE', { 'text-anchor': 'middle', 'font-size': 11.5, 'letter-spacing': '.12em', 'font-family': F_CAP, 'font-weight': 600, fill: '#aeb8be' });
-  el('circle', { r: 58, cy: 4, fill: '#2c353b', stroke: '#566168' }, plan);
-  el('circle', { r: 9, cy: 4, fill: 'none', stroke: '#7fb48f', 'stroke-width': 1.2, 'stroke-dasharray': '2 2' }, plan);
+  el('circle', { r: 62, cy: 4, fill: '#2c353b', stroke: '#566168' }, plan);
+  el('circle', { r: RING_R * 2, cy: 4, fill: 'none', stroke: '#7fb48f', 'stroke-width': 1.2, 'stroke-dasharray': '2 3' }, plan);
   el('path', { d: 'M-58 4h116M0 -54v116', stroke: '#566168', 'stroke-width': .8 }, plan);
-  el('circle', { r: 2.5, cy: 4, fill: '#cfd5d9' }, plan);
-  const planRing = el('circle', { r: 12, cy: 4, fill: 'none', stroke: '#e2e7ea', 'stroke-width': 3 }, plan);
+  const planRing = el('circle', { r: (RING_R - RING_W / 4) * 2, cy: 4, fill: 'none', stroke: '#e2e7ea', 'stroke-width': RING_W * 1.6 }, plan);
+  el('circle', { r: PIN_R * 2, cy: 4, fill: '#9aa5ac', stroke: '#eef1f2', 'stroke-width': 1.2 }, plan);
+  const planDot = el('circle', { r: 4, fill: '#ff6a3d', opacity: 0 }, plan);
   const planArrow = el('path', { stroke: '#e2864a', 'stroke-width': 2, fill: 'none' }, plan);
   const lamp = el('circle', { cx: -66, cy: 96, r: 7, fill: '#3b2f26' }, plan);
   const lampT = txt(plan, -52, 101, 'NOT BALANCED', { 'font-size': 12.5, 'letter-spacing': '.08em', 'font-family': F_CAP, 'font-weight': 700, fill: '#c9a48c' });
@@ -241,27 +246,31 @@
     if (ring.t == null) ring.t = now;
     let dt = Math.min(0.25, (now - ring.t) / 1000); ring.t = now;
     if (L.tut && L.tut.on && L.tut.skip) { ring.x = tg.x; ring.y = tg.y; ring.vx = ring.vy = 0; dt = 0; }
-    while (dt > 0) { const h = Math.min(dt, 1 / 120); const k = 38, c = 5.2; ring.vx += (-k * (ring.x - tg.x) - c * ring.vx) * h; ring.vy += (-k * (ring.y - tg.y) - c * ring.vy) * h; ring.x += ring.vx * h; ring.y += ring.vy * h; dt -= h; }
+    while (dt > 0) { const h = Math.min(dt, 1 / 120); const k = 38, c = 5.2; ring.vx += (-k * (ring.x - tg.x) - c * ring.vx) * h; ring.vy += (-k * (ring.y - tg.y) - c * ring.vy) * h; ring.x += ring.vx * h; ring.y += ring.vy * h; dt -= h;
+      const r = Math.hypot(ring.x, ring.y);
+      if (r > DMAX) { const ux = ring.x / r, uy = ring.y / r, vr = ring.vx * ux + ring.vy * uy; ring.x = ux * DMAX; ring.y = uy * DMAX; if (vr > 0) { ring.vx -= 1.25 * vr * ux; ring.vy -= 1.25 * vr * uy; } }
+    }
   }
   function placeRing() {
     const rp = P(ring.x, ring.y, 4), c = Math.cos(rad(st.phi)), s = Math.sin(rad(st.phi));
     [ringO, ringI].forEach(e => { e.setAttribute('cx', rp[0].toFixed(1)); e.setAttribute('cy', rp[1].toFixed(1)); });
     ringShadow.setAttribute('cx', rp[0].toFixed(1)); ringShadow.setAttribute('cy', (rp[1] + 4).toFixed(1));
     for (let i = 0; i < 3; i++) {
-      const a = st.a[i], ku = ring.x + 15 * Math.cos(rad(a)), kv = ring.y + 15 * Math.sin(rad(a)), kp = P(ku, kv, 4), tp = PA(R + 18, a, 28);
+      const a = st.a[i], ku = ring.x + RING_R * Math.cos(rad(a)), kv = ring.y + RING_R * Math.sin(rad(a)), kp = P(ku, kv, 4), tp = PA(R + 18, a, 28);
       strs[i].setAttribute('d', `M${pt(kp)}L${pt(tp)}`); knots[i].setAttribute('cx', kp[0].toFixed(1)); knots[i].setAttribute('cy', kp[1].toFixed(1));
     }
-    const top = P(ring.x, ring.y, 6);
-    thread.setAttribute('d', `M${HOOKP[0]} ${HOOKP[1] + 12}L${pt(top)}`); plumb.setAttribute('d', `M${HOOKP[0]} ${HOOKP[1] + 12}L${pt(P(0, 0, 16))}`);
-    const off = Math.hypot(ring.x, ring.y), ok = balanced() && off < 1.2;
+        const tie = P(ring.x - RING_R * .72, ring.y - RING_R * .72, 6); /* the thread is tied to the ring beside the pin */
+    thread.setAttribute('d', `M${HOOKP[0]} ${HOOKP[1] + 12}L${pt(tie)}`); plumb.setAttribute('d', `M${HOOKP[0]} ${HOOKP[1] + 12}L${pt(P(-RING_R * .72, -RING_R * .72, 6))}`);
+    const off = Math.hypot(ring.x, ring.y), ok = balanced() && off < 1.2, touch = off > DMAX - 0.5;
+    if (touch) { const cp = P(-PIN_R * ring.x / off, -PIN_R * ring.y / off, 4); contactDot.setAttribute('cx', cp[0].toFixed(1)); contactDot.setAttribute('cy', cp[1].toFixed(1)); contactDot.setAttribute('opacity', 1); } else contactDot.setAttribute('opacity', 0);
     thread.setAttribute('stroke', ok ? '#a8e0b6' : '#fbf6e8');
     /* plan view */
-    const sx = ring.x * c - ring.y * s, sy = ring.x * s + ring.y * c, mag = 1.05;
+    const sx = ring.x * c - ring.y * s, sy = ring.x * s + ring.y * c, mag = 2;
     planRing.setAttribute('cx', (sx * mag).toFixed(1)); planRing.setAttribute('cy', (4 - sy * mag).toFixed(1));
-    planArrow.setAttribute('d', off > 2 ? `M0 4L${(sx * mag).toFixed(1)} ${(4 - sy * mag).toFixed(1)}` : '');
+    if (off > 1) { const ux = sx / off, uy = -sy / off, cx0 = sx * mag, cy0 = 4 - sy * mag, r0 = RING_R * 2 + 6, r1 = r0 + 6 + 8 * Math.min(1, off / DMAX), ex = cx0 + ux * r1, ey = cy0 + uy * r1; planArrow.setAttribute('d', `M${(cx0 + ux * r0).toFixed(1)} ${(cy0 + uy * r0).toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}M${(ex - ux * 6 - uy * 4).toFixed(1)} ${(ey - uy * 6 + ux * 4).toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}L${(ex - ux * 6 + uy * 4).toFixed(1)} ${(ey - uy * 6 - ux * 4).toFixed(1)}`); } else planArrow.setAttribute('d', '');
+    planDot.setAttribute('opacity', touch ? 1 : 0); if (off > 0.01) { planDot.setAttribute('cx', (-PIN_R * 2 * sx / off).toFixed(1)); planDot.setAttribute('cy', (4 + PIN_R * 2 * sy / off).toFixed(1)); }
     lamp.setAttribute('fill', ok ? '#5fe08a' : '#3b2f26'); lamp.setAttribute('filter', ''); lampT.textContent = ok ? 'BALANCED' : 'NOT BALANCED'; lampT.setAttribute('fill', ok ? '#9fe6b4' : '#c9a48c');
-    const slant = Math.atan2(off, HOOK) * 180 / Math.PI;
-    slantT.textContent = `thread slant ${slant.toFixed(1)}°`;
+    slantT.textContent = ok ? 'ring clear of the pin' : touch ? `ring on the pin · pulled to ${Math.round(net().dir)}°` : off > .3 ? 'ring moving' : 'ring centred';
     /* spirit level */
     const t = tilt(), bx = clamp(t.x, -1, 1), by = clamp(t.y, -1, 1), bu = LV.u + bx * 9, bv = LV.v + by * 9, bp = P(bu, bv, 8.4);
     if (LV.bubble) { LV.bubble.setAttribute('cx', bp[0].toFixed(1)); LV.bubble.setAttribute('cy', bp[1].toFixed(1)); }
@@ -396,7 +405,7 @@
         el('rect', { x: x - 26, y: 6, width: 52, height: 24, rx: 6, fill: COL[i], stroke: '#0e1215' }, g);
         txt(g, x, 23, NAME[i], { 'text-anchor': 'middle', 'font-size': 15, 'font-family': F_CAP, 'font-weight': 700, fill: '#fff' });
         el('rect', { x: x - 54, y: 334, width: 108, height: 30, rx: 6, fill: '#a3b18c', stroke: '#0e1215' }, g);
-        txt(g, x, 355, massKg(i).toFixed(3) + ' kg', { 'text-anchor': 'middle', 'font-size': 17, 'font-family': F_CAP, 'font-weight': 700, fill: '#1b2414' });
+        txt(g, x, 355, String(+massKg(i).toFixed(3)) + ' kg', { 'text-anchor': 'middle', 'font-size': 17, 'font-family': F_CAP, 'font-weight': 700, fill: '#1b2414' });
       }
     }
   };
@@ -444,6 +453,7 @@
   const VIEWS = { full: `0 0 ${W} ${H}`, top: '30 14 950 530', pair: '30 14 950 410' };
   function setView(m) { const v = VIEWS[m] || VIEWS.full; if (svg.getAttribute('viewBox') !== v) svg.setAttribute('viewBox', v); }
   drawTray(); full();
-  L.FT = { setView, st, G, HANGER, SLOTS, FR, NAME, COL, massKg, force, net, balanced, level, tilt, target, setAngle, nudge, setPhi, addMass, liftTop, turnScrew, reset, snapshot, slotTotal, box, bbox, svg, bsvg, listeners, ring, tutAdd, tutRemove, pulleyHit, norm, gap, depth, full, MAXSLOT };
+  const contact = () => { const o = Math.hypot(ring.x, ring.y), tg = target(), tt = Math.hypot(tg.x, tg.y); return { touch: tt > DMAX - 0.5, now: o > DMAX - 0.5, dir: net().dir, off: o, max: DMAX }; };
+  L.FT = { contact, setView, st, G, HANGER, SLOTS, FR, NAME, COL, massKg, force, net, balanced, level, tilt, target, setAngle, nudge, setPhi, addMass, liftTop, turnScrew, reset, snapshot, slotTotal, box, bbox, svg, bsvg, listeners, ring, tutAdd, tutRemove, pulleyHit, norm, gap, depth, full, MAXSLOT };
   void tsub; void F_HEAD; void F_BODY;
 })(window.SOL);

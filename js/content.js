@@ -48,8 +48,8 @@
     lab(g, c[0] + 98, c[1] + 6, [{ i: 'F' }, { sub: '1' }], VC.f1);
     lab(g, pol(c, 128, 60)[0], pol(c, 128, 60)[1] - 4, [{ i: 'F' }, { sub: '2' }], VC.f2);
     lab(g, pol(c, 150, 213.7)[0] - 6, pol(c, 150, 213.7)[1] + 22, [{ i: 'F' }, { sub: '3' }, ' = equilibrant'], VC.f3, { 'text-anchor': 'middle' });
-    txt(g, 300, 312, 'head to tail: F₁ + F₂ = F_R', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--muted)', 'letter-spacing': '.06em' });
-    txt(g, 690, 22, 'balanced ring: F₃ = −F_R', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--muted)', 'letter-spacing': '.06em' });
+    tsub(g, 300, 312, ['head to tail: F₁ + F₂ = ', { i: 'F' }, { sub: 'R' }], { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--muted)', 'letter-spacing': '.06em' });
+    tsub(g, 690, 22, ['balanced ring: F₃ = −', { i: 'F' }, { sub: 'R' }], { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--muted)', 'letter-spacing': '.06em' });
   })();
 
   /* theory figures */
@@ -95,7 +95,7 @@
     const items = [
       ['Force table', 'Aluminium disc with a 0–360° scale on a tripod with levelling screws.', g => { el('ellipse', { cx: 100, cy: 48, rx: 80, ry: 28, fill: '#c3c9cd', stroke: '#1d252b', 'stroke-width': 1.5 }, g); el('path', { d: 'M20 48v8a80 28 0 0 0 160 0v-8', fill: '#8a9399', stroke: '#1d252b' }, g); for (let a = 0; a < 360; a += 15) { const c = Math.cos(rad(a)), s2 = Math.sin(rad(a)); el('path', { d: `M${100 + 74 * c} ${48 + 26 * s2}L${100 + 66 * c} ${48 + 23 * s2}`, stroke: '#1d252b' }, g); } el('path', { d: 'M100 84v18M70 108l30-6 30 6', stroke: '#c3c9cd', 'stroke-width': 4, fill: 'none' }, g); }],
       ['Pulleys and clamps', 'Low-friction pulleys that clamp anywhere on the rim.', g => { el('rect', { x: 60, y: 60, width: 60, height: 16, fill: '#4a535a' }, g); el('circle', { cx: 130, cy: 50, r: 24, fill: '#7d868c', stroke: '#c3c9cd', 'stroke-width': 3 }, g); el('circle', { cx: 130, cy: 50, r: 4, fill: '#e2e7ea' }, g); el('path', { d: 'M30 26 H130 M154 50 V104', stroke: '#ece6d6', 'stroke-width': 1.6, fill: 'none' }, g); el('path', { d: 'M80 76v20h10', stroke: '#c3c9cd', 'stroke-width': 3, fill: 'none' }, g); }],
-      ['Ring, strings and thread', 'A light ring tied to three strings, and a thread up to a hook above the centre.', g => { el('path', { d: 'M100 10 V58', stroke: '#fbf6e8', 'stroke-width': 1.4 }, g); el('path', { d: 'M100 64 L190 64 M100 64 L40 30 M100 64 L50 106', stroke: '#ece6d6', 'stroke-width': 1.6 }, g); el('circle', { cx: 100, cy: 64, r: 8, fill: 'none', stroke: '#e2e7ea', 'stroke-width': 3 }, g); }],
+      ['Ring, strings and thread', 'A light ring round the centre pin, tied to three strings, and a thread up to a hook above the centre.', g => { el('path', { d: 'M100 10 V58', stroke: '#fbf6e8', 'stroke-width': 1.4 }, g); el('path', { d: 'M100 64 L190 64 M100 64 L40 30 M100 64 L50 106', stroke: '#ece6d6', 'stroke-width': 1.6 }, g); el('circle', { cx: 100, cy: 64, r: 8, fill: 'none', stroke: '#e2e7ea', 'stroke-width': 3 }, g); }],
       ['Hangers and slotted masses', '50 g hangers; slotted masses of 10, 20, 50, 100 and 200 g.', g => { el('path', { d: 'M100 6v16', stroke: '#c3c9cd', 'stroke-width': 2 }, g); el('rect', { x: 97, y: 22, width: 6, height: 70, fill: '#2a3035' }, g); [[92, 14], [78, 10], [68, 7]].forEach(([y, h], k) => { el('rect', { x: 66, y: y - h, width: 68, height: h, rx: 3, fill: k ? '#c9a24f' : '#d9b25a', stroke: '#5c4718' }, g); }); el('rect', { x: 64, y: 92, width: 72, height: 8, rx: 3, fill: '#2a3035' }, g); }],
       ['Spirit level', 'A bull\'s-eye level: the bubble sits in the circle when the top is level.', g => { el('circle', { cx: 100, cy: 56, r: 40, fill: '#a3b18c', stroke: '#12181d', 'stroke-width': 4 }, g); el('circle', { cx: 100, cy: 56, r: 12, fill: 'none', stroke: '#1b2414', 'stroke-width': 1.4 }, g); el('circle', { cx: 100, cy: 56, r: 9, fill: '#eef5dc' }, g); }],
       ['Graph paper, ruler and protractor', 'For the scale drawing of the graphical method.', g => { el('rect', { x: 30, y: 14, width: 140, height: 90, fill: '#c9d3c8' }, g); for (let x = 30; x <= 170; x += 10) el('path', { d: `M${x} 14v90`, stroke: '#9fb0a2', 'stroke-width': .6 }, g); for (let y = 14; y <= 104; y += 10) el('path', { d: `M30 ${y}h140`, stroke: '#9fb0a2', 'stroke-width': .6 }, g); el('path', { d: 'M40 94 h60 l40 -50 M40 94 L140 44', stroke: '#c95816', 'stroke-width': 2.4, fill: 'none' }, g); }]
@@ -120,25 +120,25 @@
       svg.innerHTML = ''; const g = el('g', null, svg);
       if (i === 0) { table(g, { ring: [-14, 8] }); const lc = [210, 110]; el('circle', { cx: lc[0], cy: lc[1], r: 22, fill: '#a3b18c', stroke: '#12181d', 'stroke-width': 3 }, g); el('circle', { cx: lc[0], cy: lc[1], r: 7, fill: 'none', stroke: '#1b2414' }, g); el('circle', { cx: lc[0] + 9, cy: lc[1] - 6, r: 6, fill: '#eef5dc' }, g); txt(g, 470, 40, 'bubble → centre', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--acc-2)' }); }
       else if (i === 1) table(g, { str: [[0, VC.f1, 'F₁'], [60, VC.f2, 'F₂']], ring: [16, -10] });
-      else if (i === 2) { table(g, { str: [[0, VC.f1, 'F₁'], [60, VC.f2, 'F₂']], ring: [16, -10] }); arc(g, c, 50, 0, 60, 'var(--acc-2)', 'θ = 60°', 26); txt(g, 470, 330, 'm₁ = 0.200 kg · m₂ = 0.250 kg', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--ink-2)' }); }
+      else if (i === 2) { table(g, { str: [[0, VC.f1, 'F₁'], [60, VC.f2, 'F₂']], ring: [16, -10] }); arc(g, c, 50, 0, 60, 'var(--acc-2)', 'θ = 60°', 26); txt(g, 470, 330, 'm₁ = 0.2 kg · m₂ = 0.25 kg', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--ink-2)' }); }
       else if (i === 3) { table(g, { str: [[0, VC.f1, 'F₁'], [60, VC.f2, 'F₂'], [214, VC.f3, 'F₃']] }); txt(g, 470, 330, 'm₃ adjusted → ring centred', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--ink-2)' }); }
       else if (i === 4) { arrow(g, c, pol(c, 90, 0), VC.f1); arrow(g, c, pol(c, 112, 60), VC.f2); arrow(g, c, pol(c, 140, 33.7), VC.fr, 2.6, '6 5'); arrow(g, c, pol(c, 140, 213.7), VC.f3, 3.2); el('circle', { cx: c[0], cy: c[1], r: 7, fill: 'var(--card)', stroke: 'var(--ink)', 'stroke-width': 2.6 }, g); lab(g, pol(c, 150, 33.7)[0], pol(c, 150, 33.7)[1], [{ i: 'F' }, { sub: 'R' }], VC.fr); lab(g, pol(c, 156, 213.7)[0], pol(c, 156, 213.7)[1] + 16, [{ i: 'F' }, { sub: '3' }, ' = −', { i: 'F' }, { sub: 'R' }], VC.f3, { 'text-anchor': 'middle' }); }
-      else { triangle(g, [70, 300], 1.96, 2.45, 60, 80, { alpha: true }); txt(g, 470, 40, 'F_R = √(F₁² + F₂² + 2F₁F₂ cos θ)', { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--ink-2)' }); }
+      else { triangle(g, [70, 300], 1.96, 2.45, 60, 80, { alpha: true }); tsub(g, 470, 40, [{ i: 'F' }, { sub: 'R' }, ' = √(F₁² + F₂² + 2F₁F₂ cos θ)'], { 'text-anchor': 'middle', 'font-size': 14, 'font-family': F_CAP, 'font-weight': 600, fill: 'var(--ink-2)' }); }
     }
     const caps = [
       'Turn the levelling screws until the bubble of the spirit level sits in the inner circle. On a level top the ring feels only the strings.',
-      'Hang masses over two pulleys, here at 0° and 60°. The ring is pulled off the centre towards their resultant.',
+      'Hang masses over two pulleys, here at 0° and 60°. The ring slides towards their resultant until it rests against the centre pin.',
       'Note each hanging mass (hanger included) and each string position. θ is the angle between F₁ and F₂.',
-      'Slide the third pulley round and change its mass until the ring sits centred and the thread above it hangs straight.',
-      'The third force, the equilibrant, is equal and opposite to the resultant of F₁ and F₂: F₃ = −F_R.',
-      'Find F_R by the formula and by a scale drawing, head to tail, and compare both with F_E = m₃g.'
+      'Slide the third pulley round and change its mass until the ring sits centred round the pin without touching it.',
+      'The third force, the equilibrant, is equal and opposite to the resultant of F₁ and F₂: F₃ = −<i>F</i><sub>R</sub>.',
+      'Find <i>F</i><sub>R</sub> by the formula and by a scale drawing, head to tail, and compare both with <i>F</i><sub>E</sub> = m₃g.'
     ];
     L.methodSteps(list, cap, draw, caps);
   })();
 
   /* worked example */
   (function example() {
-    const G = 9.8, m = [0.200, 0.250, 0.390], a = [0, 60, 214], F = m.map(x => x * G), th = 60;
+    const G = 9.8, m = [0.2, 0.25, 0.39], a = [0, 60, 214], F = m.map(x => x * G), th = 60;
     const FR = Math.sqrt(F[0] ** 2 + F[1] ** 2 + 2 * F[0] * F[1] * Math.cos(rad(th))), FRs = FR.toFixed(2);
     const al = Math.atan2(F[1] * Math.sin(rad(th)), F[0] + F[1] * Math.cos(rad(th))) * 180 / Math.PI;
     const sc = 0.5, l1 = Math.round(F[0] / sc * 10) / 10, l2 = Math.round(F[1] / sc * 10) / 10;
@@ -147,9 +147,9 @@
     const FE = F[2], e1 = Math.abs(+FE.toFixed(2) - +FRs) / +FRs * 100, e2 = Math.abs(+FG.toFixed(2) - +FRs) / +FRs * 100;
     const A = (+F[0].toFixed(2)) ** 2, B = (+F[1].toFixed(2)) ** 2, Cc = 2 * +F[0].toFixed(2) * +F[1].toFixed(2) * Math.cos(rad(th));
     $('ex-table').innerHTML = `<thead><tr><th>Force</th><th>Mass <i>m</i><span class="u">kg</span></th><th>Force = <i>mg</i><span class="u">N</span></th><th>Angle <i>θ</i><span class="u">degree</span></th><th>Resultant <i>F</i><sub>R</sub><span class="fx">theoretical</span><span class="u">N</span></th><th>Resultant <i>F</i><sub>E</sub><span class="fx">experimental · <i>m</i><sub>3</sub><i>g</i></span><span class="u">N</span></th><th>Resultant <i>F</i><sub>G</sub><span class="fx">graphical</span><span class="u">N</span></th></tr></thead>
-      <tbody><tr><td class="grp"><i>F</i><sub>1</sub></td><td>${m[0].toFixed(3)}</td><td>${F[0].toFixed(2)}</td><td rowspan="2">${th}</td><td rowspan="2" class="calc-c">${FRs}</td><td rowspan="2" class="calc-c">${FE.toFixed(2)}</td><td rowspan="2" class="calc-c">${FG.toFixed(2)}</td></tr>
-      <tr><td class="grp"><i>F</i><sub>2</sub></td><td>${m[1].toFixed(3)}</td><td>${F[1].toFixed(2)}</td></tr></tbody>`;
-    $('ex-eqtable').innerHTML = `<thead><tr><th>Pulley</th><th>Position<span class="u">degree</span></th><th>Hanging mass <i>m</i><span class="u">kg</span></th><th>Force <i>mg</i><span class="u">N</span></th></tr></thead><tbody>${[0, 1, 2].map(i => `<tr><td class="grp"><i>F</i><sub>${i + 1}</sub>${i === 2 ? ' <small>equilibrant</small>' : ''}</td><td>${a[i]}</td><td>${m[i].toFixed(3)}</td><td>${F[i].toFixed(2)}</td></tr>`).join('')}</tbody><tfoot><tr><td class="lbl" colspan="4">Hanging masses include the 50 g hanger: m₁ = 0.050 + 0.100 + 0.050, m₂ = 0.050 + 0.200, m₃ = 0.050 + 0.200 + 0.100 + 0.020 + 0.020.</td></tr></tfoot>`;
+      <tbody><tr><td class="grp"><i>F</i><sub>1</sub></td><td>${String(+m[0].toFixed(3))}</td><td>${F[0].toFixed(2)}</td><td rowspan="2">${th}</td><td rowspan="2" class="calc-c">${FRs}</td><td rowspan="2" class="calc-c">${FE.toFixed(2)}</td><td rowspan="2" class="calc-c">${FG.toFixed(2)}</td></tr>
+      <tr><td class="grp"><i>F</i><sub>2</sub></td><td>${String(+m[1].toFixed(3))}</td><td>${F[1].toFixed(2)}</td></tr></tbody>`;
+    $('ex-eqtable').innerHTML = `<thead><tr><th>Pulley</th><th>Position<span class="u">degree</span></th><th>Hanging mass <i>m</i><span class="u">kg</span></th><th>Force <i>mg</i><span class="u">N</span></th></tr></thead><tbody>${[0, 1, 2].map(i => `<tr><td class="grp"><i>F</i><sub>${i + 1}</sub>${i === 2 ? ' <small>equilibrant</small>' : ''}</td><td>${a[i]}</td><td>${String(+m[i].toFixed(3))}</td><td>${F[i].toFixed(2)}</td></tr>`).join('')}</tbody><tfoot><tr><td class="lbl" colspan="4">Hanging masses include the 50 g hanger: m₁ = 0.05 + 0.1 + 0.05, m₂ = 0.05 + 0.2, m₃ = 0.05 + 0.2 + 0.1 + 0.02 + 0.02.</td></tr></tfoot>`;
     /* drawing */
     const s = $('ex-graph'), PX = 36, o = [60, 360];
     const defs = el('defs', null, s); defs.innerHTML = `<pattern id="ex-mm" width="${PX / 10}" height="${PX / 10}" patternUnits="userSpaceOnUse"><path d="M${PX / 10} 0V${PX / 10}H0" fill="none" stroke="#9fb0a2" stroke-width=".35"/></pattern><pattern id="ex-cm" width="${PX}" height="${PX}" patternUnits="userSpaceOnUse" x="${o[0]}" y="${o[1]}"><rect width="${PX}" height="${PX}" fill="url(#ex-mm)"/><path d="M${PX} 0V${PX}H0" fill="none" stroke="#7f9584" stroke-width=".9"/></pattern>`;
@@ -168,11 +168,11 @@
     /* calculation */
     const step = (n, t, body, res) => `<div class="calc-step${res ? ' result' : ''}"><span class="cs-n">${n}</span><div><div class="sub">${t}</div><div class="eq-line">${body}</div></div></div>`;
     $('ex-calc').innerHTML = [
-      step(1, 'The two forces', `<i>F</i><sub>1</sub> = <i>m</i><sub>1</sub><i>g</i> = 0.200 × 9.8 = <b>${F[0].toFixed(2)} N</b> · <i>F</i><sub>2</sub> = 0.250 × 9.8 = <b>${F[1].toFixed(2)} N</b>`),
+      step(1, 'The two forces', `<i>F</i><sub>1</sub> = <i>m</i><sub>1</sub><i>g</i> = 0.2 × 9.8 = <b>${F[0].toFixed(2)} N</b> · <i>F</i><sub>2</sub> = 0.25 × 9.8 = <b>${F[1].toFixed(2)} N</b>`),
       step(2, 'Angle between them', `<i>θ</i> = 60° − 0° = <b>60°</b>`),
       step(3, 'Theoretical resultant', `<i>F</i><sub>R</sub> = √(${F[0].toFixed(2)}² + ${F[1].toFixed(2)}² + 2 × ${F[0].toFixed(2)} × ${F[1].toFixed(2)} × cos 60°) = √(${A.toFixed(4)} + ${B.toFixed(4)} + ${Cc.toFixed(4)}) = √${(A + B + Cc).toFixed(4)} = <b>${FRs} N</b>`),
       step(4, 'Direction of the resultant', `tan <i>α</i> = ${F[1].toFixed(2)} × sin 60° ÷ (${F[0].toFixed(2)} + ${F[1].toFixed(2)} × cos 60°) = ${(F[1] * Math.sin(rad(60))).toFixed(3)} ÷ ${(F[0] + F[1] * .5).toFixed(3)} → <i>α</i> = <b>${al.toFixed(1)}°</b>; equilibrant expected at ${(al + 180).toFixed(1)}°, found at 214°`),
-      step(5, 'Experimental resultant', `<i>F</i><sub>E</sub> = <i>m</i><sub>3</sub><i>g</i> = 0.390 × 9.8 = <b>${FE.toFixed(2)} N</b>`),
+      step(5, 'Experimental resultant', `<i>F</i><sub>E</sub> = <i>m</i><sub>3</sub><i>g</i> = 0.39 × 9.8 = <b>${FE.toFixed(2)} N</b>`),
       step(6, 'Graphical resultant', `<i>ℓ</i><sub>1</sub> = ${F[0].toFixed(2)} ÷ 0.5 = ${(F[0] / sc).toFixed(2)} ≈ ${l1.toFixed(1)} cm, <i>ℓ</i><sub>2</sub> = ${F[1].toFixed(2)} ÷ 0.5 = ${l2.toFixed(1)} cm; measured <i>ℓ</i><sub>R</sub> = ${lRr.toFixed(1)} cm, so <i>F</i><sub>G</sub> = ${lRr.toFixed(1)} × 0.5 = <b>${FG.toFixed(2)} N</b>`),
       step(7, '% differences from the theoretical value', `experimental: |${FE.toFixed(2)} − ${FRs}| ÷ ${FRs} × 100 = <b>${e1.toFixed(2)} %</b> · graphical: |${FG.toFixed(2)} − ${FRs}| ÷ ${FRs} × 100 = <b>${e2.toFixed(2)} %</b>`, true)
     ].join('');
